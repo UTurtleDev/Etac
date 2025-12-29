@@ -1,0 +1,567 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ entreprise.nom_entreprise }} - Questionnaires{% endblock %}
+
+{% block content %}
+<div class="voir-questionnaire-container">
+    <div class="header-card card">
+        <h1>{{ entreprise.nom_entreprise }}</h1>
+        <p class="siren-info"><strong>SIREN :</strong> {{ entreprise.siren }}</p>
+        <p class="date-info">
+            <small>
+                Créé le {{ entreprise.date_creation|date:"d/m/Y à H:i" }} -
+                Modifié le {{ entreprise.date_modification|date:"d/m/Y à H:i" }}
+            </small>
+        </p>
+    </div>
+
+    <!-- Onglets -->
+    <div class="tabs-container card">
+        <div class="tabs">
+            {% if has_client %}
+            <button class="tab-btn active" onclick="showTab('client')">
+                Questionnaire Client
+            </button>
+            {% endif %}
+
+            {% if has_collaborateur %}
+            <button class="tab-btn {% if not has_client %}active{% endif %}" onclick="showTab('collaborateur')">
+                Questionnaire Collaborateur
+            </button>
+            {% endif %}
+
+            {% if has_client and has_collaborateur %}
+            <button class="tab-btn" onclick="showTab('synthese')">
+                Vue Synthétique
+            </button>
+            {% endif %}
+        </div>
+
+        <!-- Contenu Questionnaire Client -->
+        {% if has_client %}
+        <div id="tab-client" class="tab-content active">
+            <h2>Questionnaire Client</h2>
+            <p class="meta-info">
+                <small>
+                    Complété le {{ questionnaire_client.date_completion|date:"d/m/Y à H:i" }}
+                    {% if questionnaire_client.modifie_par_collaborateur %}
+                    - Modifié par {{ questionnaire_client.modifie_par_collaborateur.get_full_name }}
+                    {% endif %}
+                </small>
+            </p>
+
+            <div class="questionnaire-section">
+                <h3>Équipement actuel</h3>
+                <dl>
+                    <dt>Logiciel de facturation</dt>
+                    <dd>{{ questionnaire_client.logiciel_facturation|yesno:"Oui,Non" }}
+                        {% if questionnaire_client.logiciel_facturation_nom %}
+                        - {{ questionnaire_client.logiciel_facturation_nom }}
+                        {% endif %}
+                    </dd>
+
+                    <dt>Factures au format électronique</dt>
+                    <dd>{{ questionnaire_client.get_factures_format_electronique_display|default:"Non renseigné" }}</dd>
+
+                    <dt>Logiciel de devis</dt>
+                    <dd>{{ questionnaire_client.logiciel_devis|yesno:"Oui,Non" }}
+                        {% if questionnaire_client.logiciel_devis_nom %}
+                        - {{ questionnaire_client.logiciel_devis_nom }}
+                        {% endif %}
+                    </dd>
+
+                    <dt>Caisse enregistreuse</dt>
+                    <dd>{{ questionnaire_client.get_caisse_enregistreuse_display|default:"Non renseigné" }}
+                        {% if questionnaire_client.caisse_enregistreuse_nom %}
+                        - {{ questionnaire_client.caisse_enregistreuse_nom }}
+                        {% endif %}
+                    </dd>
+
+                    <dt>Caisse certifiée</dt>
+                    <dd>{{ questionnaire_client.get_caisse_certifiee_display|default:"Non renseigné" }}</dd>
+
+                    <dt>Plateforme agréée</dt>
+                    <dd>{{ questionnaire_client.get_plateforme_agreee_display|default:"Non renseigné" }}
+                        {% if questionnaire_client.plateforme_agreee_nom %}
+                        - {{ questionnaire_client.plateforme_agreee_nom }}
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+
+            <div class="questionnaire-section">
+                <h3>Gestion facturation</h3>
+                <dl>
+                    <dt>Gestion future</dt>
+                    <dd>{{ questionnaire_client.get_gestion_future_display|default:"Non renseigné" }}</dd>
+
+                    <dt>Aisance avec les outils numériques</dt>
+                    <dd>{{ questionnaire_client.get_aisance_outils_display|default:"Non renseigné" }}</dd>
+                </dl>
+            </div>
+
+            <div class="questionnaire-section">
+                <h3>Informations complémentaires</h3>
+                <dl>
+                    <dt>Réception factures achats</dt>
+                    <dd>{{ questionnaire_client.get_reception_factures_achats_display|default:"Non renseigné" }}
+                        {% if questionnaire_client.reception_achats_autre %}
+                        - {{ questionnaire_client.reception_achats_autre }}
+                        {% endif %}
+                    </dd>
+
+                    <dt>Envoi factures ventes</dt>
+                    <dd>{{ questionnaire_client.get_envoi_factures_ventes_display|default:"Non renseigné" }}
+                        {% if questionnaire_client.envoi_ventes_autre %}
+                        - {{ questionnaire_client.envoi_ventes_autre }}
+                        {% endif %}
+                    </dd>
+
+                    <dt>Conservation factures</dt>
+                    <dd>{{ questionnaire_client.get_conservation_factures_display|default:"Non renseigné" }}</dd>
+
+                    <dt>Accompagnement souhaité</dt>
+                    <dd>
+                        {% if questionnaire_client.accompagnement_souhaite %}
+                        {{ questionnaire_client.accompagnement_souhaite|join:", " }}
+                        {% if questionnaire_client.accompagnement_autre %}
+                        - {{ questionnaire_client.accompagnement_autre }}
+                        {% endif %}
+                        {% else %}
+                        Non renseigné
+                        {% endif %}
+                    </dd>
+
+                    {% if questionnaire_client.commentaires %}
+                    <dt>Commentaires</dt>
+                    <dd>{{ questionnaire_client.commentaires }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Contenu Questionnaire Collaborateur -->
+        {% if has_collaborateur %}
+        <div id="tab-collaborateur" class="tab-content {% if not has_client %}active{% endif %}">
+            <h2>Questionnaire Collaborateur</h2>
+            <p class="meta-info">
+                <small>
+                    Complété le {{ questionnaire_collaborateur.date_completion|date:"d/m/Y à H:i" }}
+                    par {{ questionnaire_collaborateur.collaborateur.get_full_name }}
+                </small>
+            </p>
+
+            <div class="questionnaire-section">
+                <h3>Assujettissement et activité</h3>
+                <dl>
+                    <dt>Assujettie à la TVA</dt>
+                    <dd>{{ questionnaire_collaborateur.get_assujettie_tva_display|default:"Non renseigné" }}</dd>
+
+                    <dt>Code APE</dt>
+                    <dd>{{ questionnaire_collaborateur.code_ape|default:"Non renseigné" }}</dd>
+
+                    <dt>Activité précise</dt>
+                    <dd>{{ questionnaire_collaborateur.activite_precise|default:"Non renseigné" }}</dd>
+
+                    <dt>Taille entreprise</dt>
+                    <dd>{{ questionnaire_collaborateur.get_taille_entreprise_display|default:"Non renseigné" }}</dd>
+
+                    <dt>Régime TVA</dt>
+                    <dd>{{ questionnaire_collaborateur.get_regime_tva_display|default:"Non renseigné" }}</dd>
+
+                    <dt>Activité exonérée TVA</dt>
+                    <dd>{{ questionnaire_collaborateur.get_activite_exoneree_tva_display|default:"Non renseigné" }}</dd>
+
+                    <dt>Plateforme agréée</dt>
+                    <dd>{{ questionnaire_collaborateur.plateforme_agreee|yesno:"Oui,Non" }}
+                        {% if questionnaire_collaborateur.plateforme_agreee_nom %}
+                        - {{ questionnaire_collaborateur.plateforme_agreee_nom }}
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+
+            <div class="questionnaire-section">
+                <h3>Flux facturation - Ventes</h3>
+                <dl>
+                    <dt>Nombre factures ventes/an</dt>
+                    <dd>{{ questionnaire_collaborateur.get_nb_factures_ventes_display|default:"Non renseigné" }}</dd>
+
+                    <dt>Nombre clients actifs</dt>
+                    <dd>{{ questionnaire_collaborateur.get_nb_clients_actifs_display|default:"Non renseigné" }}</dd>
+
+                    <dt>Types de ventes</dt>
+                    <dd>
+                        {% if questionnaire_collaborateur.vente_btob_domestique %}✓ B2B France<br>{% endif %}
+                        {% if questionnaire_collaborateur.vente_btob_export %}✓ B2B Export<br>{% endif %}
+                        {% if questionnaire_collaborateur.vente_btoc_facture %}✓ B2C avec facture<br>{% endif %}
+                        {% if questionnaire_collaborateur.vente_btoc_caisse %}✓ B2C avec ticket<br>{% endif %}
+                    </dd>
+                </dl>
+            </div>
+
+            <div class="questionnaire-section">
+                <h3>Flux facturation - Achats</h3>
+                <dl>
+                    <dt>Nombre factures achats/an</dt>
+                    <dd>{{ questionnaire_collaborateur.get_nb_factures_achats_display|default:"Non renseigné" }}</dd>
+
+                    <dt>Nombre fournisseurs actifs</dt>
+                    <dd>{{ questionnaire_collaborateur.get_nb_fournisseurs_actifs_display|default:"Non renseigné" }}</dd>
+
+                    <dt>Types d'achats</dt>
+                    <dd>
+                        {% if questionnaire_collaborateur.achat_btob_domestique %}✓ B2B France<br>{% endif %}
+                        {% if questionnaire_collaborateur.achat_btob_intracommunautaire %}✓ B2B UE<br>{% endif %}
+                        {% if questionnaire_collaborateur.achat_btob_hors_ue %}✓ B2B hors UE<br>{% endif %}
+                    </dd>
+                </dl>
+            </div>
+
+            {% if questionnaire_collaborateur.commentaires %}
+            <div class="questionnaire-section">
+                <h3>Observations</h3>
+                <p>{{ questionnaire_collaborateur.commentaires }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Vue Synthétique -->
+        {% if has_client and has_collaborateur %}
+        <div id="tab-synthese" class="tab-content">
+            <h2>Vue Synthétique</h2>
+            <p class="info-text">Comparaison des informations client et collaborateur</p>
+
+            <div class="synthese-grid">
+                <!-- Plateforme agréée -->
+                <div class="synthese-item">
+                    <h4>📱 Plateforme agréée (Chorus Pro, etc.)</h4>
+                    <div class="comparison">
+                        <div class="comp-item">
+                            <strong>Client:</strong> {{ questionnaire_client.get_plateforme_agreee_display }}
+                            {% if questionnaire_client.plateforme_agreee_nom %}
+                            <br><em>{{ questionnaire_client.plateforme_agreee_nom }}</em>
+                            {% endif %}
+                        </div>
+                        <div class="comp-item">
+                            <strong>Collaborateur:</strong> {{ questionnaire_collaborateur.plateforme_agreee|yesno:"Oui,Non" }}
+                            {% if questionnaire_collaborateur.plateforme_agreee_nom %}
+                            <br><em>{{ questionnaire_collaborateur.plateforme_agreee_nom }}</em>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assujettissement TVA -->
+                <div class="synthese-item">
+                    <h4>💼 Assujettissement à la TVA</h4>
+                    <div class="comparison">
+                        <div class="comp-item">
+                            <strong>Client:</strong> Information non demandée
+                        </div>
+                        <div class="comp-item">
+                            <strong>Collaborateur:</strong> {{ questionnaire_collaborateur.get_assujettie_tva_display }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Régime TVA -->
+                <div class="synthese-item">
+                    <h4>📋 Régime de TVA</h4>
+                    <div class="comparison">
+                        <div class="comp-item">
+                            <strong>Client:</strong> Information non demandée
+                        </div>
+                        <div class="comp-item">
+                            <strong>Collaborateur:</strong> {{ questionnaire_collaborateur.get_regime_tva_display|default:"Non renseigné" }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activité -->
+                <div class="synthese-item">
+                    <h4>🏢 Activité de l'entreprise</h4>
+                    <div class="comparison">
+                        <div class="comp-item">
+                            <strong>Client:</strong> Information non demandée
+                        </div>
+                        <div class="comp-item">
+                            <strong>Collaborateur:</strong>
+                            <br>Code APE: {{ questionnaire_collaborateur.code_ape|default:"Non renseigné" }}
+                            <br>{{ questionnaire_collaborateur.activite_precise|truncatewords:15 }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gestion de la facturation -->
+                <div class="synthese-item">
+                    <h4>⚙️ Gestion de la facturation</h4>
+                    <div class="comparison">
+                        <div class="comp-item">
+                            <strong>Client - Gestion future:</strong> {{ questionnaire_client.get_gestion_future_display|default:"Non renseigné" }}
+                            <br><strong>Aisance outils:</strong> {{ questionnaire_client.get_aisance_outils_display|default:"Non renseigné" }}
+                        </div>
+                        <div class="comp-item">
+                            <strong>Collaborateur - Taille:</strong> {{ questionnaire_collaborateur.get_taille_entreprise_display|default:"Non renseigné" }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Volumes - Ventes -->
+                <div class="synthese-item">
+                    <h4>📈 Volumes de facturation - Ventes</h4>
+                    <div class="comparison">
+                        <div class="comp-item">
+                            <strong>Client:</strong> Information non demandée
+                        </div>
+                        <div class="comp-item">
+                            <strong>Collaborateur:</strong>
+                            <br>Factures/an: {{ questionnaire_collaborateur.get_nb_factures_ventes_display|default:"Non renseigné" }}
+                            <br>Clients actifs: {{ questionnaire_collaborateur.get_nb_clients_actifs_display|default:"Non renseigné" }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Volumes - Achats -->
+                <div class="synthese-item">
+                    <h4>📉 Volumes de facturation - Achats</h4>
+                    <div class="comparison">
+                        <div class="comp-item">
+                            <strong>Client:</strong> Information non demandée
+                        </div>
+                        <div class="comp-item">
+                            <strong>Collaborateur:</strong>
+                            <br>Factures/an: {{ questionnaire_collaborateur.get_nb_factures_achats_display|default:"Non renseigné" }}
+                            <br>Fournisseurs actifs: {{ questionnaire_collaborateur.get_nb_fournisseurs_actifs_display|default:"Non renseigné" }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Équipement actuel -->
+                <div class="synthese-item">
+                    <h4>💻 Équipement actuel du client</h4>
+                    <div class="comparison single-col">
+                        <div class="comp-item">
+                            <strong>Logiciel de facturation:</strong> {{ questionnaire_client.logiciel_facturation|yesno:"Oui,Non" }}
+                            {% if questionnaire_client.logiciel_facturation_nom %}
+                            ({{ questionnaire_client.logiciel_facturation_nom }})
+                            {% endif %}
+                            <br><strong>Factures électroniques:</strong> {{ questionnaire_client.get_factures_format_electronique_display|default:"Non renseigné" }}
+                            <br><strong>Logiciel de devis:</strong> {{ questionnaire_client.logiciel_devis|yesno:"Oui,Non" }}
+                            {% if questionnaire_client.logiciel_devis_nom %}
+                            ({{ questionnaire_client.logiciel_devis_nom }})
+                            {% endif %}
+                            <br><strong>Caisse enregistreuse:</strong> {{ questionnaire_client.get_caisse_enregistreuse_display|default:"Non renseigné" }}
+                            {% if questionnaire_client.caisse_enregistreuse_nom %}
+                            ({{ questionnaire_client.caisse_enregistreuse_nom }})
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flux et canaux -->
+                <div class="synthese-item">
+                    <h4>🔄 Flux de réception et envoi</h4>
+                    <div class="comparison">
+                        <div class="comp-item">
+                            <strong>Client - Réception achats:</strong> {{ questionnaire_client.get_reception_factures_achats_display|default:"Non renseigné" }}
+                            <br><strong>Envoi ventes:</strong> {{ questionnaire_client.get_envoi_factures_ventes_display|default:"Non renseigné" }}
+                            <br><strong>Conservation:</strong> {{ questionnaire_client.get_conservation_factures_display|default:"Non renseigné" }}
+                        </div>
+                        <div class="comp-item">
+                            <strong>Collaborateur - Types de ventes:</strong>
+                            <br>{{ questionnaire_collaborateur.vente_btob_domestique|yesno:"✓,✗" }} B2B France
+                            <br>{{ questionnaire_collaborateur.vente_btob_export|yesno:"✓,✗" }} B2B Export
+                            <br>{{ questionnaire_collaborateur.vente_btoc_facture|yesno:"✓,✗" }} B2C Facture
+                            <br>{{ questionnaire_collaborateur.vente_btoc_caisse|yesno:"✓,✗" }} B2C Caisse
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accompagnement -->
+                <div class="synthese-item">
+                    <h4>🤝 Accompagnement souhaité par le client</h4>
+                    <div class="comparison single-col">
+                        <div class="comp-item">
+                            {% if questionnaire_client.accompagnement_souhaite %}
+                            {{ questionnaire_client.accompagnement_souhaite|join:", " }}
+                            {% if questionnaire_client.accompagnement_autre %}
+                            <br>Autre: {{ questionnaire_client.accompagnement_autre }}
+                            {% endif %}
+                            {% else %}
+                            Non renseigné
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="actions-card card">
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+            ← Retour au dashboard
+        </a>
+    </div>
+</div>
+
+<script>
+function showTab(tabName) {
+    // Masquer tous les contenus
+    const contents = document.querySelectorAll('.tab-content');
+    contents.forEach(content => content.classList.remove('active'));
+
+    // Désactiver tous les boutons
+    const buttons = document.querySelectorAll('.tab-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+
+    // Activer le contenu et le bouton sélectionnés
+    document.getElementById('tab-' + tabName).classList.add('active');
+    event.target.classList.add('active');
+}
+</script>
+
+<style>
+.voir-questionnaire-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.header-card {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.siren-info {
+    color: var(--gris-moyen);
+    font-size: 1.1rem;
+}
+
+.date-info {
+    color: var(--gris-moyen);
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    border-bottom: 2px solid var(--gris-clair);
+    margin-bottom: 30px;
+}
+
+.tab-btn {
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--gris-moyen);
+    transition: all 0.3s;
+}
+
+.tab-btn:hover {
+    color: var(--vert-moyen);
+}
+
+.tab-btn.active {
+    color: var(--vert-moyen);
+    border-bottom-color: var(--vert-moyen);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.meta-info {
+    color: var(--gris-moyen);
+    margin-bottom: 30px;
+}
+
+.questionnaire-section {
+    margin-bottom: 40px;
+}
+
+.questionnaire-section h3 {
+    color: var(--vert-moyen);
+    border-bottom: 1px solid var(--gris-clair);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+dl {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 15px 20px;
+}
+
+dt {
+    font-weight: 600;
+    color: var(--gris-fonce);
+}
+
+dd {
+    margin: 0;
+    color: var(--gris-moyen);
+}
+
+.synthese-grid {
+    display: grid;
+    gap: 20px;
+}
+
+.synthese-item {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 6px;
+}
+
+.synthese-item h4 {
+    color: var(--vert-moyen);
+    margin-bottom: 15px;
+}
+
+.comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.comparison.single-col {
+    grid-template-columns: 1fr;
+}
+
+.comp-item {
+    padding: 15px;
+    background: white;
+    border-radius: 4px;
+    line-height: 1.8;
+}
+
+.actions-card {
+    margin-top: 30px;
+}
+
+@media (max-width: 768px) {
+    dl {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .comparison {
+        grid-template-columns: 1fr;
+    }
+
+    .tabs {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}

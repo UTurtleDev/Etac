@@ -1,0 +1,438 @@
+/* ============================================================================
+   CABINET ETAC - STYLES DE BASE
+   Fichier CSS commun à toutes les applications du site
+   ============================================================================ */
+
+/* ============================================================================
+   VARIABLES CSS
+   ============================================================================ */
+:root {
+    /* Verts (du logo et bannière) */
+    --vert-fonce: #2D5016;
+    --vert-moyen: #4A7729;
+    --vert-clair: #90C659;
+
+    /* Gris (professionnalisme) */
+    --gris-fonce: #2C2C2C;
+    --gris-moyen: #666666;
+    --gris-clair: #E5E5E5;
+    --blanc: #FFFFFF;
+
+    /* États */
+    --succes: #4A7729;
+    --erreur: #D32F2F;
+    --avertissement: #F57C00;
+    --info: #1976D2;
+}
+
+/* ============================================================================
+   RESET ET BASE
+   ============================================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+                 'Helvetica', 'Arial', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--gris-fonce);
+    background: #F5F5F5;
+}
+
+/* ============================================================================
+   TYPOGRAPHIE
+   ============================================================================ */
+h1 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--gris-fonce);
+}
+
+h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+h3 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+}
+
+h4 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+p {
+    margin-bottom: 1rem;
+}
+
+a {
+    color: var(--vert-moyen);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: var(--vert-fonce);
+}
+
+/* ============================================================================
+   LAYOUT
+   ============================================================================ */
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.main-content {
+    min-height: calc(100vh - 180px);
+    padding: 40px 0;
+}
+
+/* ============================================================================
+   HEADER
+   ============================================================================ */
+.header {
+    background: white;
+    border-bottom: 2px solid var(--gris-clair);
+    padding: 20px 0;
+    margin-bottom: 0;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-img {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+}
+
+.logo-text {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gris-fonce);
+}
+
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-link {
+    font-weight: 500;
+}
+
+.nav-user {
+    color: var(--gris-moyen);
+}
+
+/* ============================================================================
+   FOOTER
+   ============================================================================ */
+.footer {
+    background: var(--gris-fonce);
+    color: white;
+    text-align: center;
+    padding: 30px 20px;
+    margin-top: 60px;
+}
+
+.footer p {
+    margin-bottom: 0.5rem;
+}
+
+.footer-link {
+    color: white;
+    text-decoration: underline;
+}
+
+.footer-link:hover {
+    color: var(--vert-clair);
+}
+
+/* ============================================================================
+   BANNIÈRE COOKIES
+   ============================================================================ */
+.cookie-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 2px solid var(--gris-clair);
+    padding: 20px;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.cookie-content {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.cookie-actions {
+    display: flex;
+    gap: 15px;
+    flex-shrink: 0;
+}
+
+/* ============================================================================
+   MESSAGES DJANGO
+   ============================================================================ */
+.messages-container {
+    margin-top: 20px;
+}
+
+.alert {
+    padding: 15px 20px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    border-left: 4px solid;
+}
+
+.alert-success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-color: var(--succes);
+}
+
+.alert-error,
+.alert-danger {
+    background: #ffebee;
+    color: #c62828;
+    border-color: var(--erreur);
+}
+
+.alert-warning {
+    background: #fff3e0;
+    color: #e65100;
+    border-color: var(--avertissement);
+}
+
+.alert-info {
+    background: #e3f2fd;
+    color: #1565c0;
+    border-color: var(--info);
+}
+
+/* ============================================================================
+   CARDS
+   ============================================================================ */
+.card {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 24px;
+}
+
+/* ============================================================================
+   BOUTONS
+   ============================================================================ */
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: var(--vert-moyen);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--vert-fonce);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    color: white;
+}
+
+.btn-secondary {
+    background: white;
+    color: var(--gris-fonce);
+    border: 2px solid var(--gris-clair);
+}
+
+.btn-secondary:hover {
+    border-color: var(--vert-moyen);
+    color: var(--vert-moyen);
+}
+
+.btn-danger {
+    background: var(--erreur);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #B71C1C;
+    color: white;
+}
+
+.btn-large {
+    padding: 16px 32px;
+    font-size: 18px;
+}
+
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+.btn-link {
+    background: transparent;
+    color: var(--vert-moyen);
+    padding: 8px 12px;
+}
+
+.btn-link:hover {
+    color: var(--vert-fonce);
+    background: transparent;
+    text-decoration: underline;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* ============================================================================
+   FORMULAIRES
+   ============================================================================ */
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--gris-fonce);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--gris-clair);
+    border-radius: 6px;
+    font-size: 16px;
+    font-family: inherit;
+    transition: border-color 0.3s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--vert-moyen);
+    box-shadow: 0 0 0 3px rgba(74, 119, 41, 0.1);
+}
+
+.form-help {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.875rem;
+    color: var(--gris-moyen);
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.required {
+    color: var(--erreur);
+}
+
+/* ============================================================================
+   HELPER CLASSES
+   ============================================================================ */
+.text-center {
+    text-align: center;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 768px) {
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; }
+
+    .container {
+        padding: 0 15px;
+    }
+
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .header-content {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .cookie-content {
+        flex-direction: column;
+    }
+
+    .form-actions,
+    .btn-group {
+        flex-direction: column;
+    }
+
+    .card {
+        padding: 20px;
+    }
+}

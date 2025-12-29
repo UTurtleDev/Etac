@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Collaborateur{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    {% csrf_token %}
+    <div class="dashboard-header">
+        <h1>Dashboard Collaborateur</h1>
+        <div class="header-actions">
+            <a href="{% url 'export_csv' %}" class="btn btn-secondary">
+                📊 Exporter CSV
+            </a>
+            <a href="{% url 'collaborateur_identification' %}" class="btn btn-primary">
+                + Nouveau questionnaire
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-value">{{ total_entreprises }}</div>
+            <div class="stat-label">Entreprises total</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-value">{{ questionnaires_client }}</div>
+            <div class="stat-label">Questionnaires clients</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📋</div>
+            <div class="stat-value">{{ questionnaires_collaborateur }}</div>
+            <div class="stat-label">Questionnaires collaborateurs</div>
+        </div>
+    </div>
+
+    <!-- Filtres et recherche -->
+    <div class="card">
+        <h2>Filtres et recherche</h2>
+        <form method="get" class="filters-form">
+            <div class="filters-grid">
+                <div class="form-group">
+                    <label for="search">Recherche</label>
+                    <input type="text" id="search" name="search" value="{{ search_query }}"
+                           placeholder="SIREN ou nom d'entreprise">
+                </div>
+
+                <div class="form-group">
+                    <label for="filter">Filtrer par questionnaire</label>
+                    <select id="filter" name="filter">
+                        <option value="all" {% if filter_questionnaire == 'all' %}selected{% endif %}>Tous</option>
+                        <option value="both" {% if filter_questionnaire == 'both' %}selected{% endif %}>Les deux complétés</option>
+                        <option value="client_only" {% if filter_questionnaire == 'client_only' %}selected{% endif %}>Client uniquement</option>
+                        <option value="collaborateur_only" {% if filter_questionnaire == 'collaborateur_only' %}selected{% endif %}>Collaborateur uniquement</option>
+                        <option value="none" {% if filter_questionnaire == 'none' %}selected{% endif %}>Aucun questionnaire</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="sort">Trier par</label>
+                    <select id="sort" name="sort">
+                        <option value="-date_modification" {% if sort_by == '-date_modification' %}selected{% endif %}>Date modification ↓</option>
+                        <option value="date_modification" {% if sort_by == 'date_modification' %}selected{% endif %}>Date modification ↑</option>
+                        <option value="-date_creation" {% if sort_by == '-date_creation' %}selected{% endif %}>Date création ↓</option>
+                        <option value="date_creation" {% if sort_by == 'date_creation' %}selected{% endif %}>Date création ↑</option>
+                        <option value="nom_entreprise" {% if sort_by == 'nom_entreprise' %}selected{% endif %}>Nom A-Z</option>
+                        <option value="-nom_entreprise" {% if sort_by == '-nom_entreprise' %}selected{% endif %}>Nom Z-A</option>
+                        <option value="siren" {% if sort_by == 'siren' %}selected{% endif %}>SIREN ↑</option>
+                        <option value="-siren" {% if sort_by == '-siren' %}selected{% endif %}>SIREN ↓</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">Appliquer</button>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Réinitialiser</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Liste des entreprises -->
+    <div class="card">
+        <h2>Liste des entreprises
+            {% if search_query or filter_questionnaire != 'all' %}
+            <small>({{ entreprises.count }} résultat{{ entreprises.count|pluralize }})</small>
+            {% endif %}
+        </h2>
+
+        {% if entreprises %}
+        <div class="table-responsive">
+            <table class="entreprises-table">
+                <thead>
+                    <tr>
+                        <th>SIREN</th>
+                        <th>Nom entreprise</th>
+                        <th>Q. Client</th>
+                        <th>Q. Collaborateur</th>
+                        <th>Date modification</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entreprise in entreprises %}
+                    <tr>
+                        <td><code>{{ entreprise.siren }}</code></td>
+                        <td><strong>{{ entreprise.nom_entreprise }}</strong></td>
+                        <td>
+                            {% if entreprise.questionnaire_client %}
+                            <span class="badge badge-success">✓ Complété</span>
+                            {% else %}
+                            <span class="badge badge-grey">- Non rempli</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if entreprise.questionnaire_collaborateur %}
+                            <span class="badge badge-success">✓ Complété</span>
+                            {% else %}
+                            <span class="badge badge-grey">- Non rempli</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ entreprise.date_modification|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'voir_questionnaire' siren=entreprise.siren %}" class="btn btn-sm btn-secondary" title="Voir les détails">
+                                    👁️ Voir
+                                </a>
+                                {% if user.is_authenticated %}
+                                <a href="{% url 'editer_entreprise' siren=entreprise.siren %}" class="btn btn-sm btn-primary" title="Éditer">
+                                    ✏️
+                                </a>
+                                <button class="btn btn-sm btn-danger" onclick="confirmDelete('{{ entreprise.siren }}', '{{ entreprise.nom_entreprise }}')" title="Archiver">
+                                    🗑️
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>Aucune entreprise enregistrée pour le moment.</p>
+            <a href="{% url 'collaborateur_identification' %}" class="btn btn-primary">
+                Créer le premier questionnaire
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: var(--vert-moyen);
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    color: var(--gris-moyen);
+    font-size: 0.9rem;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.entreprises-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.entreprises-table th {
+    background: #f9f9f9;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid var(--gris-clair);
+}
+
+.entreprises-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--gris-clair);
+}
+
+.entreprises-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.badge-success {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badge-grey {
+    background: #f5f5f5;
+    color: #757575;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--gris-moyen);
+}
+
+.filters-form {
+    margin-top: 20px;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.action-buttons .btn {
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .entreprises-table {
+        font-size: 0.9rem;
+    }
+
+    .entreprises-table th,
+    .entreprises-table td {
+        padding: 8px;
+    }
+
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+function confirmDelete(siren, nomEntreprise) {
+    if (confirm(`Êtes-vous sûr de vouloir archiver l'entreprise "${nomEntreprise}" (SIREN: ${siren}) ?\n\nCette action peut être annulée depuis l'administration.`)) {
+        // Créer un formulaire pour envoyer une requête POST
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/questionnaires/collaborateur/archiver/${siren}/`;
+
+        // Ajouter le token CSRF
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfToken) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'csrfmiddlewaretoken';
+            input.value = csrfToken.value;
+            form.appendChild(input);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Identification - Questionnaire Client{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+{% endblock %}
+
+{% block content %}
+<div class="identification-container">
+    <div class="card">
+        <h1>Identification de votre entreprise</h1>
+
+        <p class="intro-text">
+            Pour commencer, veuillez saisir le numéro SIREN de votre entreprise.
+            Nous récupérerons automatiquement les informations de votre société.
+        </p>
+
+        <form method="post" class="identification-form">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="siren">Numéro SIREN <span class="required">*</span></label>
+                <input
+                    type="text"
+                    id="siren"
+                    name="siren"
+                    pattern="[0-9]{9}"
+                    maxlength="9"
+                    placeholder="9 chiffres"
+                    value="{{ siren|default:'' }}"
+                    required
+                    hx-get="{% url 'validate_siren' %}"
+                    hx-trigger="blur"
+                    hx-target="#company-name"
+                    hx-indicator="#spinner"
+                    hx-include="[name='siren']"
+                >
+                <small class="form-help">Le SIREN est un numéro à 9 chiffres qui identifie votre entreprise</small>
+
+                <div id="spinner" class="htmx-indicator">
+                    <span class="spinner"></span> Vérification en cours...
+                </div>
+
+                <div id="company-name"></div>
+            </div>
+
+            {% if questionnaire_exists %}
+            <div class="alert alert-warning">
+                <strong>⚠️ Un questionnaire existe déjà pour cette entreprise :</strong>
+                <p>{{ nom_entreprise }} (SIREN: {{ siren }})</p>
+                <p>Souhaitez-vous le modifier ?</p>
+
+                <div class="btn-group">
+                    <button type="submit" name="action" value="modifier" class="btn btn-primary">
+                        Modifier le questionnaire
+                    </button>
+                    <a href="{% url 'home' %}" class="btn btn-secondary">
+                        Annuler
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    Continuer
+                </button>
+                <a href="{% url 'client_introduction' %}" class="btn btn-secondary">
+                    Retour
+                </a>
+            </div>
+            {% endif %}
+        </form>
+
+        <div class="help-box">
+            <h4>Où trouver mon numéro SIREN ?</h4>
+            <ul>
+                <li>Sur vos factures</li>
+                <li>Sur votre extrait Kbis</li>
+                <li>Sur vos documents administratifs</li>
+                <li>Sur le site <a href="https://www.sirene.fr" target="_blank" rel="noopener">sirene.fr</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+.htmx-indicator {
+    display: none;
+    color: var(--vert-moyen);
+    margin-top: 10px;
+}
+
+.htmx-request .htmx-indicator {
+    display: inline-block;
+}
+
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--vert-moyen);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+#company-name {
+    margin-top: 10px;
+}
+
+#company-name .company-found {
+    padding: 10px;
+    background: #e8f5e9;
+    border-left: 4px solid var(--vert-moyen);
+    border-radius: 4px;
+}
+
+#company-name .error {
+    color: var(--erreur);
+    font-weight: 500;
+}
+</style>
+{% endblock %}

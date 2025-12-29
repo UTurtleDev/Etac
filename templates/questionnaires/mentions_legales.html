@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Mentions légales et RGPD{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>Mentions légales et confidentialité</h1>
+
+    <div id="cookies" class="section">
+        <h2>Cookies et données personnelles</h2>
+
+        <h3>Quels cookies utilisons-nous ?</h3>
+        <p>
+            Ce site utilise uniquement des <strong>cookies strictement nécessaires</strong> à son fonctionnement :
+        </p>
+        <ul>
+            <li><strong>Cookie de session Django (sessionid)</strong> : permet de maintenir votre connexion et de
+                sauvegarder votre progression dans les questionnaires</li>
+            <li><strong>Cookie CSRF</strong> : protège le site contre les attaques de type Cross-Site Request Forgery</li>
+        </ul>
+
+        <p><strong>Durée de conservation :</strong> 4 heures</p>
+        <p><strong>Aucun cookie publicitaire ou de tracking n'est utilisé sur ce site.</strong></p>
+
+        <h3>Comment refuser les cookies ?</h3>
+        <p>
+            Vous pouvez configurer votre navigateur pour refuser les cookies. Cependant, cela empêchera le
+            fonctionnement normal du site.
+        </p>
+
+        <h3>Données personnelles collectées</h3>
+        <p>Dans le cadre de l'utilisation de ce site, nous collectons :</p>
+        <ul>
+            <li><strong>Pour les clients :</strong> numéro SIREN, nom de l'entreprise, réponses aux questionnaires</li>
+            <li><strong>Pour les collaborateurs :</strong> adresse email, nom, prénom</li>
+        </ul>
+
+        <h3>Finalité du traitement</h3>
+        <p>
+            Les données sont collectées dans le but exclusif d'établir un diagnostic de votre situation
+            concernant la facturation électronique 2026 et de vous proposer un accompagnement adapté.
+        </p>
+
+        <h3>Durée de conservation</h3>
+        <p>
+            Les données sont conservées pendant <strong>1 an</strong> à compter de leur collecte.
+        </p>
+
+        <h3>Vos droits RGPD</h3>
+        <p>Conformément au RGPD, vous disposez des droits suivants :</p>
+        <ul>
+            <li><strong>Droit d'accès :</strong> obtenir une copie de vos données</li>
+            <li><strong>Droit de rectification :</strong> corriger des données inexactes</li>
+            <li><strong>Droit à l'effacement :</strong> demander la suppression de vos données</li>
+            <li><strong>Droit d'opposition :</strong> vous opposer au traitement de vos données</li>
+            <li><strong>Droit à la portabilité :</strong> récupérer vos données dans un format structuré</li>
+        </ul>
+
+        <p>
+            Pour exercer vos droits, contactez le Cabinet ETAC à l'adresse :
+            <strong>[adresse email du cabinet]</strong>
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>Responsable de traitement</h2>
+        <p>
+            <strong>Cabinet ETAC</strong><br>
+            [Adresse complète]<br>
+            Email : [email du cabinet]<br>
+            Téléphone : [téléphone du cabinet]
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>Hébergement</h2>
+        <p>
+            Ce site est hébergé par <strong>O2Switch</strong><br>
+            CHEMIN DES PARDIAUX<br>
+            63000 CLERMONT-FERRAND<br>
+            France
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>Développement</h2>
+        <p>
+            Développé par <strong>UTurtleDev</strong> pour le Cabinet ETAC<br>
+            Année 2025
+        </p>
+    </div>
+
+    <div class="form-actions">
+        <a href="{% url 'home' %}" class="btn btn-secondary">Retour à l'accueil</a>
+    </div>
+</div>
+
+<style>
+.section {
+    margin: 40px 0;
+}
+
+.section h2 {
+    color: var(--vert-moyen);
+    border-bottom: 2px solid var(--gris-clair);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.section h3 {
+    margin-top: 25px;
+}
+
+.section ul {
+    margin-left: 30px;
+    margin-bottom: 15px;
+}
+
+.section li {
+    margin-bottom: 8px;
+}
+</style>
+{% endblock %}

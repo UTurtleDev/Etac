@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Nouveau questionnaire - Identification{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+{% endblock %}
+
+{% block content %}
+<div class="identification-container">
+    <div class="card">
+        <h1>Nouveau questionnaire collaborateur</h1>
+
+        <p class="intro-text">
+            Saisissez le numéro SIREN de l'entreprise pour laquelle vous souhaitez remplir le questionnaire.
+        </p>
+
+        <form method="post" class="identification-form">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="siren">Numéro SIREN <span class="required">*</span></label>
+                <input
+                    type="text"
+                    id="siren"
+                    name="siren"
+                    pattern="[0-9]{9}"
+                    maxlength="9"
+                    placeholder="9 chiffres"
+                    value="{{ siren|default:'' }}"
+                    required
+                    hx-get="{% url 'validate_siren' %}"
+                    hx-trigger="blur"
+                    hx-target="#company-name"
+                    hx-indicator="#spinner"
+                    hx-include="[name='siren']"
+                >
+                <small class="form-help">Le SIREN est un numéro à 9 chiffres qui identifie l'entreprise</small>
+
+                <div id="spinner" class="htmx-indicator">
+                    <span class="spinner"></span> Vérification en cours...
+                </div>
+
+                <div id="company-name"></div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    Continuer
+                </button>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                    Retour au dashboard
+                </a>
+            </div>
+        </form>
+
+        <div class="help-box">
+            <h4>Où trouver le numéro SIREN ?</h4>
+            <ul>
+                <li>Dans le dossier client de l'entreprise</li>
+                <li>Sur l'extrait Kbis</li>
+                <li>Sur les documents administratifs de l'entreprise</li>
+                <li>Sur le site <a href="https://www.sirene.fr" target="_blank" rel="noopener">sirene.fr</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+.htmx-indicator {
+    display: none;
+    color: var(--vert-moyen);
+    margin-top: 10px;
+}
+
+.htmx-request .htmx-indicator {
+    display: inline-block;
+}
+
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--vert-moyen);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+#company-name {
+    margin-top: 10px;
+}
+
+#company-name .company-found {
+    padding: 10px;
+    background: #e8f5e9;
+    border-left: 4px solid var(--vert-moyen);
+    border-radius: 4px;
+}
+
+#company-name .error {
+    color: var(--erreur);
+    font-weight: 500;
+}
+
+.help-box {
+    margin-top: 40px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 6px;
+}
+
+.help-box h4 {
+    margin-bottom: 10px;
+    color: var(--gris-fonce);
+}
+
+.help-box ul {
+    margin-left: 20px;
+}
+
+.help-box li {
+    margin-bottom: 5px;
+}
+</style>
+{% endblock %}

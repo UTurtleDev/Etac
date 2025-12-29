@@ -1,0 +1,90 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cabinet ETAC - Facturation Électronique 2026{% endblock %}</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'base/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'questionnaires/css/styles.css' %}">
+    {% block extra_css %}{% endblock %}
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'base/images/etac.png' %}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="{% static 'base/images/etac.png' %}" alt="Logo ETAC" class="logo-img">
+                    <span class="logo-text">Cabinet ETAC</span>
+                </div>
+
+                {% if user.is_authenticated %}
+                <nav class="header-nav">
+                    <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
+                    <span class="nav-user">{{ user.get_full_name|default:user.email }}</span>
+                    <a href="{% url 'logout' %}" class="btn btn-secondary btn-sm">Déconnexion</a>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Messages Django -->
+    {% if messages %}
+    <div class="messages-container">
+        <div class="container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Contenu principal -->
+    <main class="main-content">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 UTurtleDev pour le Cabinet ETAC - Tous droits réservés</p>
+            <p><a href="{% url 'mentions_legales' %}" class="footer-link">Mentions légales</a></p>
+        </div>
+    </footer>
+
+    <!-- Bannière cookies -->
+    <div id="cookie-banner" class="cookie-banner" style="display: none;">
+        <div class="cookie-content">
+            <p>
+                Ce site utilise des cookies strictement nécessaires à son
+                fonctionnement (gestion de session). Aucun cookie publicitaire
+                ou de tracking n'est utilisé.
+            </p>
+            <div class="cookie-actions">
+                <button onclick="acceptCookies()" class="btn btn-primary">
+                    J'accepte
+                </button>
+                <a href="{% url 'mentions_legales' %}#cookies" class="btn btn-link">
+                    En savoir plus
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{% static 'base/js/base.js' %}"></script>
+    <script src="{% static 'questionnaires/js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

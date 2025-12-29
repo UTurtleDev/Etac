@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Accueil - Cabinet ETAC - Facturation Électronique 2026{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <!-- Bannière facturation 2026 -->
+    <div class="banner">
+        <img src="{% static 'questionnaires/images/facturation2026.png' %}"
+             alt="Facturation Électronique 2026"
+             class="banner-img">
+    </div>
+
+    <!-- Texte d'introduction -->
+    <div class="intro-section">
+        <h1>Bienvenue sur le questionnaire Facturation Électronique 2026</h1>
+
+        <div class="intro-text">
+            <p>
+                À partir du 1er septembre 2026, <strong>toutes les entreprises assujetties à la TVA</strong>
+                devront émettre et recevoir leurs factures au <strong>format électronique</strong>.
+            </p>
+
+            <p>
+                Pour vous accompagner dans cette transition, le Cabinet ETAC met à votre disposition
+                ce questionnaire en ligne qui nous permettra d'évaluer votre situation actuelle et
+                vos besoins spécifiques.
+            </p>
+
+            <p>
+                <strong>Durée estimée :</strong> 5-10 minutes
+            </p>
+        </div>
+    </div>
+
+    <!-- Call to Actions -->
+    <div class="cta-section">
+        <div class="cta-card cta-client">
+            <div class="cta-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </div>
+            <h2>Je suis un client</h2>
+            <p>
+                Vous êtes client du Cabinet ETAC et souhaitez remplir
+                le questionnaire de diagnostic.
+            </p>
+            <a href="{% url 'client_introduction' %}" class="btn btn-primary btn-large">
+                Commencer le questionnaire
+            </a>
+        </div>
+
+        <div class="cta-card cta-collaborateur">
+            <div class="cta-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="9" y1="9" x2="15" y2="9"></line>
+                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                </svg>
+            </div>
+            <h2>Je suis un collaborateur</h2>
+            <p>
+                Vous êtes collaborateur du Cabinet ETAC et souhaitez accéder
+                au dashboard de gestion.
+            </p>
+            <a href="{% url 'collaborateur_login' %}" class="btn btn-secondary btn-large">
+                Accéder au dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Informations complémentaires -->
+    <div class="info-section">
+        <h3>Pourquoi ce questionnaire ?</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <h4>Diagnostic personnalisé</h4>
+                <p>Évaluer votre situation actuelle et vos équipements</p>
+            </div>
+            <div class="info-item">
+                <h4>Accompagnement adapté</h4>
+                <p>Identifier vos besoins spécifiques pour la transition</p>
+            </div>
+            <div class="info-item">
+                <h4>Conformité 2026</h4>
+                <p>Vous préparer efficacement à l'obligation légale</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Connexion Collaborateur{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="card login-card">
+        <h1>Espace Collaborateur</h1>
+        <p class="intro-text">
+            Connectez-vous pour accéder au dashboard de gestion des questionnaires.
+        </p>
+
+        <form method="post" class="login-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="id_username">Email <span class="required">*</span></label>
+                <input
+                    type="email"
+                    name="username"
+                    id="id_username"
+                    required
+                    autofocus
+                    placeholder="votre.email@cabinet-etac.fr"
+                    {% if form.username.value %}value="{{ form.username.value }}"{% endif %}
+                >
+                {% if form.username.errors %}
+                <span class="error-message">{{ form.username.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_password">Mot de passe <span class="required">*</span></label>
+                <input
+                    type="password"
+                    name="password"
+                    id="id_password"
+                    required
+                    placeholder="••••••••"
+                >
+                {% if form.password.errors %}
+                <span class="error-message">{{ form.password.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-large">
+                    Se connecter
+                </button>
+                <a href="{% url 'home' %}" class="btn btn-secondary">
+                    Retour à l'accueil
+                </a>
+            </div>
+        </form>
+
+        <div class="login-help">
+            <p><small>
+                En cas de problème de connexion, contactez votre administrateur.
+            </small></p>
+        </div>
+    </div>
+</div>
+
+<style>
+.login-container {
+    max-width: 500px;
+    margin: 60px auto;
+}
+
+.login-card {
+    text-align: center;
+}
+
+.login-form {
+    text-align: left;
+    margin-top: 30px;
+}
+
+.login-help {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--gris-clair);
+    color: var(--gris-moyen);
+}
+
+.error-message {
+    display: block;
+    color: var(--erreur);
+    font-size: 14px;
+    margin-top: 4px;
+}
+</style>
+{% endblock %}

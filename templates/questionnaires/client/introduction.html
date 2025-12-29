@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Introduction - Questionnaire Client{% endblock %}
+
+{% block content %}
+<div class="client-introduction">
+    <div class="intro-card">
+        <h1>Questionnaire - Facturation Électronique 2026</h1>
+
+        <div class="intro-content">
+            <p class="intro-greeting"><strong>Cher client,</strong></p>
+
+            <p>
+                À partir du <strong>1er septembre 2026</strong>, toutes les entreprises assujetties à la TVA
+                devront émettre et recevoir leurs factures au format électronique.
+            </p>
+
+            <p>
+                Pour vous accompagner au mieux dans cette transition importante, nous avons besoin de mieux
+                comprendre votre situation actuelle et vos besoins spécifiques.
+            </p>
+
+            <p>
+                Ce questionnaire nous permettra de :
+            </p>
+            <ul class="intro-list">
+                <li>Évaluer votre équipement actuel en matière de facturation</li>
+                <li>Identifier vos pratiques et habitudes</li>
+                <li>Déterminer le type d'accompagnement le plus adapté à votre situation</li>
+                <li>Vous proposer des solutions personnalisées</li>
+            </ul>
+
+            <div class="intro-info">
+                <p><strong>Durée estimée :</strong> 5 à 10 minutes</p>
+                <p><strong>Confidentialité :</strong> Vos réponses sont strictement confidentielles et utilisées
+                    uniquement dans le cadre de votre accompagnement par le Cabinet ETAC.</p>
+            </div>
+
+            <p class="intro-thanks">
+                Merci de votre collaboration et de votre confiance.
+            </p>
+
+            <p class="intro-signature">
+                <strong>L'équipe du Cabinet ETAC</strong>
+            </p>
+        </div>
+
+        <div class="intro-actions">
+            <a href="{% url 'client_identification' %}" class="btn btn-primary btn-large">
+                Commencer le questionnaire
+            </a>
+            <a href="{% url 'home' %}" class="btn btn-secondary">
+                Retour à l'accueil
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
