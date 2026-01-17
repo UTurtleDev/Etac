@@ -56,12 +56,12 @@ class QuestionnaireClient(models.Model):
 
     # 1.2 Format électronique
     CHOIX_OUI_NON_NSP = [
-        ('oui', 'Oui'),
-        ('non', 'Non'),
-        ('nsp', 'Je ne sais pas'),
+        ('yes', 'Oui'),
+        ('no', 'Non'),
+        ('dont_know', 'Je ne sais pas'),
     ]
     factures_format_electronique = models.CharField(
-        max_length=10,
+        max_length=20,
         choices=CHOIX_OUI_NON_NSP,
         blank=True
     )
@@ -72,12 +72,12 @@ class QuestionnaireClient(models.Model):
 
     # 1.4 Caisse enregistreuse
     CHOIX_CAISSE = [
-        ('oui', 'Oui'),
-        ('non', 'Non'),
-        ('na', 'Non applicable'),
+        ('yes', 'Oui'),
+        ('no', 'Non'),
+        ('not_applicable', 'Non applicable'),
     ]
     caisse_enregistreuse = models.CharField(
-        max_length=10,
+        max_length=20,
         choices=CHOIX_CAISSE,
         blank=True
     )
@@ -85,14 +85,14 @@ class QuestionnaireClient(models.Model):
 
     # 1.5 Certification caisse
     caisse_certifiee = models.CharField(
-        max_length=10,
+        max_length=20,
         choices=CHOIX_OUI_NON_NSP,
         blank=True
     )
 
     # 1.6 Plateforme agréée
     plateforme_agreee = models.CharField(
-        max_length=10,
+        max_length=20,
         choices=CHOIX_OUI_NON_NSP,
         blank=True
     )
@@ -101,9 +101,9 @@ class QuestionnaireClient(models.Model):
     # === PARTIE 2 : GESTION FACTURATION ===
 
     CHOIX_GESTION = [
-        ('interne', 'Gérer en interne avec accompagnement'),
-        ('deleguer', 'Déléguer au cabinet'),
-        ('nsp', 'Je ne sais pas, besoin de conseils'),
+        ('internal', 'Gérer en interne avec accompagnement'),
+        ('delegate', 'Déléguer au cabinet'),
+        ('dont_know', 'Je ne sais pas, besoin de conseils'),
     ]
     gestion_future = models.CharField(
         max_length=20,
@@ -112,9 +112,9 @@ class QuestionnaireClient(models.Model):
     )
 
     CHOIX_AISANCE = [
-        ('tres_aise', 'Très à l\'aise'),
-        ('moyen', 'Moyen'),
-        ('pas_aise', 'Pas du tout à l\'aise'),
+        ('very_comfortable', 'Très à l\'aise'),
+        ('medium', 'Moyen'),
+        ('not_comfortable', 'Pas du tout à l\'aise'),
     ]
     aisance_outils = models.CharField(
         max_length=20,
@@ -125,11 +125,11 @@ class QuestionnaireClient(models.Model):
     # === PARTIE 3 : INFOS COMPLÉMENTAIRES ===
 
     CHOIX_RECEPTION_ACHATS = [
-        ('papier', 'Principalement par courrier papier'),
+        ('paper', 'Principalement par courrier papier'),
         ('email', 'Principalement par email (PDF)'),
-        ('mixte', 'Mix papier/email'),
-        ('plateforme', 'Via plateforme dématérialisée'),
-        ('autre', 'Autre'),
+        ('mixed', 'Mix papier/email'),
+        ('platform', 'Via plateforme dématérialisée'),
+        ('other', 'Autre'),
     ]
     reception_factures_achats = models.CharField(
         max_length=20,
@@ -146,10 +146,10 @@ class QuestionnaireClient(models.Model):
     envoi_ventes_autre = models.CharField(max_length=255, blank=True)
 
     CHOIX_CONSERVATION = [
-        ('papier', 'Classement papier uniquement'),
-        ('electronique', 'Archivage électronique uniquement'),
-        ('mixte', 'Mix papier + électronique'),
-        ('cabinet', 'Confié au cabinet comptable'),
+        ('paper', 'Classement papier uniquement'),
+        ('electronic', 'Archivage électronique uniquement'),
+        ('mixed', 'Mix papier + électronique'),
+        ('accounting_firm', 'Confié au cabinet comptable'),
     ]
     conservation_factures = models.CharField(
         max_length=20,
@@ -209,12 +209,12 @@ class QuestionnaireCollaborateur(models.Model):
     # === ASSUJETTISSEMENT ET ACTIVITÉ ===
 
     CHOIX_TVA = [
-        ('oui', 'Oui'),
-        ('non', 'Non'),
-        ('doute', 'J\'ai un doute'),
+        ('yes', 'Oui'),
+        ('no', 'Non'),
+        ('unsure', 'J\'ai un doute'),
     ]
     assujettie_tva = models.CharField(
-        max_length=10,
+        max_length=20,
         choices=CHOIX_TVA,
         blank=True
     )
@@ -223,9 +223,9 @@ class QuestionnaireCollaborateur(models.Model):
     activite_precise = models.TextField(blank=True)
 
     CHOIX_TAILLE = [
-        ('tpe_pme', 'TPE/PME'),
-        ('eti', 'ETI'),
-        ('grande', 'Grande entreprise'),
+        ('small_medium', 'TPE/PME'),
+        ('mid_sized', 'ETI'),
+        ('large', 'Grande entreprise'),
     ]
     taille_entreprise = models.CharField(
         max_length=20,
@@ -235,9 +235,9 @@ class QuestionnaireCollaborateur(models.Model):
 
     CHOIX_REGIME_TVA = [
         ('franchise', 'Franchise en base'),
-        ('reel_simplifie', 'Réel simplifié'),
-        ('reel_trimestriel', 'Réel trimestriel'),
-        ('reel_mensuel', 'Réel mensuel'),
+        ('simplified_real', 'Réel simplifié'),
+        ('quarterly_real', 'Réel trimestriel'),
+        ('monthly_real', 'Réel mensuel'),
     ]
     regime_tva = models.CharField(
         max_length=20,
@@ -246,13 +246,13 @@ class QuestionnaireCollaborateur(models.Model):
     )
 
     CHOIX_ACTIVITE_EXONEREE = [
-        ('sante', 'Prestations santé'),
-        ('enseignement', 'Enseignement et formation'),
-        ('immobilier', 'Opérations immobilières'),
-        ('asso', 'Associations à but non lucratif'),
-        ('banque', 'Opérations bancaires et financières'),
-        ('assurance', 'Opérations d\'assurance'),
-        ('mixte', 'Activité mixte ou n\'exerce pas dans ces secteurs'),
+        ('health', 'Prestations santé'),
+        ('education', 'Enseignement et formation'),
+        ('real_estate', 'Opérations immobilières'),
+        ('nonprofit', 'Associations à but non lucratif'),
+        ('banking', 'Opérations bancaires et financières'),
+        ('insurance', 'Opérations d\'assurance'),
+        ('mixed', 'Activité mixte ou n\'exerce pas dans ces secteurs'),
     ]
     activite_exoneree_tva = models.CharField(
         max_length=20,
@@ -266,12 +266,12 @@ class QuestionnaireCollaborateur(models.Model):
     # === FLUX FACTURATION - VENTES ===
 
     CHOIX_NOMBRE = [
-        ('moins_50', 'Moins de 50'),
-        ('50_200', 'Entre 50 et 200'),
-        ('200_1000', 'Entre 200 et 1000'),
-        ('1000_5000', 'Entre 1000 et 5000'),
-        ('plus_5000', 'Plus de 5000'),
-        ('na', 'N/A'),
+        ('less_than_50', 'Moins de 50'),
+        ('between_50_200', 'Entre 50 et 200'),
+        ('between_200_1000', 'Entre 200 et 1000'),
+        ('between_1000_5000', 'Entre 1000 et 5000'),
+        ('more_than_5000', 'Plus de 5000'),
+        ('not_applicable', 'N/A'),
     ]
     nb_factures_ventes = models.CharField(
         max_length=20,
@@ -280,11 +280,11 @@ class QuestionnaireCollaborateur(models.Model):
     )
 
     CHOIX_CLIENTS = [
-        ('moins_10', 'Moins de 10'),
-        ('10_50', 'Entre 10 et 50'),
-        ('50_200', 'Entre 50 et 200'),
-        ('plus_200', 'Plus de 200'),
-        ('na', 'N/A'),
+        ('less_than_10', 'Moins de 10'),
+        ('between_10_50', 'Entre 10 et 50'),
+        ('between_50_200', 'Entre 50 et 200'),
+        ('more_than_200', 'Plus de 200'),
+        ('not_applicable', 'N/A'),
     ]
     nb_clients_actifs = models.CharField(
         max_length=20,

@@ -80,11 +80,15 @@ a:hover {
     color: var(--vert-fonce);
 }
 
+.strong {
+    font-weight: bold;
+}
+
 /* ============================================================================
    LAYOUT
    ============================================================================ */
 .container {
-    max-width: 900px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 0 20px;
 }
@@ -232,6 +236,7 @@ a:hover {
 
 .btn-group {
     display: flex;
+    justify-content: space-evenly;
     gap: 10px;
     margin-top: 20px;
 }

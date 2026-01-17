@@ -38,6 +38,7 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 # Application definition
 
 INSTALLED_APPS = [
+    'axes',  # Protection contre les attaques brute force (DOIT être avant django.contrib.admin)
     'users',
     'questionnaires',
     'django.contrib.admin',
@@ -54,6 +55,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'axes.middleware.AxesMiddleware',  # Protection brute force (DOIT être après AuthenticationMiddleware)
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -172,3 +174,14 @@ INSEE_API_KEY = env('INSEE_API_KEY', default='')
 LOGIN_URL = '/collaborateur/login/'
 LOGIN_REDIRECT_URL = '/collaborateur/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
+
+# Django Axes - Protection contre les attaques brute force
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',  # Backend axes pour la protection brute force
+    'django.contrib.auth.backends.ModelBackend',  # Backend par défaut de Django
+]
+AXES_FAILURE_LIMIT = 5  # Nombre max de tentatives échouées
+AXES_COOLOFF_TIME = 1  # Temps de blocage en heures
+AXES_LOCKOUT_PARAMETERS = [['username', 'ip_address']]  # Bloquer par combinaison user + IP
+AXES_RESET_ON_SUCCESS = True  # Réinitialiser le compteur après connexion réussie
+AXES_LOCKOUT_TEMPLATE = None  # Utiliser le template par défaut

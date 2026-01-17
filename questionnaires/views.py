@@ -4,9 +4,65 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q
+from django.core.paginator import Paginator
 import csv
 from .models import Entreprise, QuestionnaireClient, QuestionnaireCollaborateur
+from .forms import QuestionnaireClientForm, QuestionnaireCollaborateurForm
 from .utils import get_company_info
+
+
+def _process_siren_identification(request, siren, session_prefix, check_existing_questionnaire=False):
+    """
+    Logique commune de validation SIREN et stockage en session.
+
+    Args:
+        request: HttpRequest
+        siren: str - Numéro SIREN
+        session_prefix: str - 'client' ou 'collab'
+        check_existing_questionnaire: bool - Vérifier si questionnaire existe
+
+    Returns:
+        dict: {
+            'success': bool,
+            'entreprise': Entreprise (si success=True),
+            'exists': bool (si check_existing_questionnaire=True),
+            'error': str (si success=False)
+        }
+    """
+    # Validation SIREN
+    if not siren:
+        return {'success': False, 'error': 'Veuillez saisir un numéro SIREN'}
+
+    # Appel API INSEE
+    result = get_company_info(siren)
+
+    if not result['success']:
+        return {'success': False, 'error': result['error']}
+
+    # Vérifier si un questionnaire existe déjà
+    try:
+        entreprise = Entreprise.objects.get(siren=siren)
+        exists = False
+
+        if check_existing_questionnaire:
+            questionnaire_attr = f'questionnaire_{session_prefix}'
+            exists = hasattr(entreprise, questionnaire_attr)
+
+    except Entreprise.DoesNotExist:
+        entreprise = None
+        exists = False
+
+    # Stocker en session
+    request.session[f'{session_prefix}_siren'] = siren
+    request.session[f'{session_prefix}_nom_entreprise'] = result['nom']
+
+    return {
+        'success': True,
+        'entreprise': entreprise,
+        'exists': exists,
+        'nom': result['nom'],
+        'error': None
+    }
 
 
 def home(request):
@@ -32,14 +88,12 @@ def client_identification(request):
     """Page d'identification avec SIREN"""
     if request.method == 'POST':
         siren = request.POST.get('siren', '').strip()
+        action = request.POST.get('action', '')
 
-        # Validation SIREN
-        if not siren:
-            messages.error(request, 'Veuillez saisir un numéro SIREN')
-            return render(request, 'questionnaires/client/identification.html')
-
-        # Appel API INSEE
-        result = get_company_info(siren)
+        # Utiliser la fonction helper pour le traitement
+        result = _process_siren_identification(
+            request, siren, 'client', check_existing_questionnaire=True
+        )
 
         if not result['success']:
             messages.error(request, result['error'])
@@ -47,23 +101,19 @@ def client_identification(request):
                 'siren': siren
             })
 
-        # Vérifier si un questionnaire existe déjà
-        try:
-            entreprise = Entreprise.objects.get(siren=siren)
-            questionnaire_exists = hasattr(entreprise, 'questionnaire_client')
+        # Si un questionnaire existe déjà
+        if result['exists']:
+            # Si l'utilisateur a confirmé qu'il veut modifier, rediriger vers le questionnaire
+            if action == 'modifier':
+                return redirect('client_questionnaire')
+            # Sinon, afficher un avertissement
+            return render(request, 'questionnaires/client/identification.html', {
+                'siren': siren,
+                'nom_entreprise': result['nom'],
+                'questionnaire_exists': True
+            })
 
-            if questionnaire_exists:
-                return render(request, 'questionnaires/client/identification.html', {
-                    'siren': siren,
-                    'nom_entreprise': entreprise.nom_entreprise,
-                    'questionnaire_exists': True
-                })
-        except Entreprise.DoesNotExist:
-            pass
-
-        # Stocker les infos en session et rediriger vers le questionnaire
-        request.session['client_siren'] = siren
-        request.session['client_nom_entreprise'] = result['nom']
+        # Rediriger vers le questionnaire
         return redirect('client_questionnaire')
 
     return render(request, 'questionnaires/client/identification.html')
@@ -105,57 +155,48 @@ def client_questionnaire(request):
         messages.error(request, 'Session expirée. Veuillez recommencer.')
         return redirect('client_identification')
 
+    # Créer ou récupérer l'entreprise
+    entreprise, created = Entreprise.objects.get_or_create(
+        siren=siren,
+        defaults={'nom_entreprise': nom_entreprise}
+    )
+
+    # Récupérer l'instance existante si elle existe
+    questionnaire = getattr(entreprise, 'questionnaire_client', None)
+
     if request.method == 'POST':
-        # Créer ou récupérer l'entreprise
-        entreprise, created = Entreprise.objects.get_or_create(
-            siren=siren,
-            defaults={'nom_entreprise': nom_entreprise}
-        )
+        form = QuestionnaireClientForm(request.POST, instance=questionnaire)
+        if form.is_valid():
+            questionnaire = form.save(commit=False)
+            questionnaire.entreprise = entreprise
+            questionnaire.save()
+            form.save_m2m()  # Nécessaire pour sauvegarder les ManyToMany (accompagnement_souhaite)
 
-        # Traiter les checkboxes pour accompagnement_souhaite
-        accompagnement = request.POST.getlist('accompagnement_souhaite')
-
-        # Créer ou mettre à jour le questionnaire
-        questionnaire, created = QuestionnaireClient.objects.update_or_create(
-            entreprise=entreprise,
-            defaults={
-                'logiciel_facturation': 'logiciel_facturation' in request.POST,
-                'logiciel_facturation_nom': request.POST.get('logiciel_facturation_nom', ''),
-                'factures_format_electronique': request.POST.get('factures_format_electronique', ''),
-                'logiciel_devis': 'logiciel_devis' in request.POST,
-                'logiciel_devis_nom': request.POST.get('logiciel_devis_nom', ''),
-                'caisse_enregistreuse': request.POST.get('caisse_enregistreuse', ''),
-                'caisse_enregistreuse_nom': request.POST.get('caisse_enregistreuse_nom', ''),
-                'caisse_certifiee': request.POST.get('caisse_certifiee', ''),
-                'plateforme_agreee': request.POST.get('plateforme_agreee', ''),
-                'plateforme_agreee_nom': request.POST.get('plateforme_agreee_nom', ''),
-                'gestion_future': request.POST.get('gestion_future', ''),
-                'aisance_outils': request.POST.get('aisance_outils', ''),
-                'reception_factures_achats': request.POST.get('reception_factures_achats', ''),
-                'reception_achats_autre': request.POST.get('reception_achats_autre', ''),
-                'envoi_factures_ventes': request.POST.get('envoi_factures_ventes', ''),
-                'envoi_ventes_autre': request.POST.get('envoi_ventes_autre', ''),
-                'conservation_factures': request.POST.get('conservation_factures', ''),
-                'accompagnement_souhaite': accompagnement,
-                'accompagnement_autre': request.POST.get('accompagnement_autre', ''),
-                'commentaires': request.POST.get('commentaires', ''),
-            }
-        )
-
-        # Stocker l'ID du questionnaire en session
-        request.session['questionnaire_id'] = str(entreprise.siren)
-        messages.success(request, 'Questionnaire enregistré avec succès !')
-        return redirect('client_recapitulatif')
+            # Stocker l'ID du questionnaire en session
+            request.session['questionnaire_id'] = str(entreprise.siren)
+            messages.success(request, 'Questionnaire enregistré avec succès !')
+            return redirect('client_recapitulatif')
+        else:
+            # Afficher les erreurs spécifiques
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == '__all__':
+                        messages.error(request, f'{error}')
+                    else:
+                        field_label = form.fields[field].label or field
+                        messages.error(request, f'{field_label}: {error}')
+    else:
+        form = QuestionnaireClientForm(instance=questionnaire)
 
     return render(request, 'questionnaires/client/questionnaire.html', {
         'siren': siren,
-        'nom_entreprise': nom_entreprise
+        'nom_entreprise': nom_entreprise,
+        'form': form
     })
 
 
 def client_recapitulatif(request):
     """Page de récapitulatif client"""
-    # TODO: Récupérer les données du questionnaire
     return render(request, 'questionnaires/client/recapitulatif.html')
 
 
@@ -217,11 +258,17 @@ def dashboard(request):
     if sort_by in valid_sorts:
         entreprises = entreprises.order_by(sort_by)
 
+    # Pagination
+    paginator = Paginator(entreprises, 20)  # 20 entreprises par page
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
     context = {
         'total_entreprises': total_entreprises,
         'questionnaires_client': questionnaires_client,
         'questionnaires_collaborateur': questionnaires_collaborateur,
-        'entreprises': entreprises,
+        'entreprises': page_obj,
+        'page_obj': page_obj,
         'search_query': search_query,
         'filter_questionnaire': filter_questionnaire,
         'sort_by': sort_by,
@@ -236,12 +283,10 @@ def collaborateur_identification(request):
     if request.method == 'POST':
         siren = request.POST.get('siren', '').strip()
 
-        if not siren:
-            messages.error(request, 'Veuillez saisir un numéro SIREN')
-            return render(request, 'questionnaires/collaborateur/identification.html')
-
-        # Appel API INSEE
-        result = get_company_info(siren)
+        # Utiliser la fonction helper pour le traitement
+        result = _process_siren_identification(
+            request, siren, 'collab', check_existing_questionnaire=True
+        )
 
         if not result['success']:
             messages.error(request, result['error'])
@@ -249,20 +294,12 @@ def collaborateur_identification(request):
                 'siren': siren
             })
 
-        # Vérifier si un questionnaire collaborateur existe déjà
-        try:
-            entreprise = Entreprise.objects.get(siren=siren)
-            questionnaire_exists = hasattr(entreprise, 'questionnaire_collaborateur')
+        # Si un questionnaire collaborateur existe déjà, rediriger vers la visualisation
+        if result['exists']:
+            messages.warning(request, 'Un questionnaire collaborateur existe déjà pour cette entreprise.')
+            return redirect('voir_questionnaire', siren=siren)
 
-            if questionnaire_exists:
-                messages.warning(request, 'Un questionnaire collaborateur existe déjà pour cette entreprise.')
-                return redirect('voir_questionnaire', siren=siren)
-        except Entreprise.DoesNotExist:
-            pass
-
-        # Stocker en session
-        request.session['collab_siren'] = siren
-        request.session['collab_nom_entreprise'] = result['nom']
+        # Rediriger vers le questionnaire
         return redirect('collaborateur_questionnaire')
 
     return render(request, 'questionnaires/collaborateur/identification.html')
@@ -278,56 +315,50 @@ def collaborateur_questionnaire(request):
         messages.error(request, 'Session expirée. Veuillez recommencer.')
         return redirect('collaborateur_identification')
 
+    # Créer ou récupérer l'entreprise
+    entreprise, created = Entreprise.objects.get_or_create(
+        siren=siren,
+        defaults={'nom_entreprise': nom_entreprise}
+    )
+
+    # Récupérer l'instance existante si elle existe
+    questionnaire = getattr(entreprise, 'questionnaire_collaborateur', None)
+
     if request.method == 'POST':
-        # Créer ou récupérer l'entreprise
-        entreprise, created = Entreprise.objects.get_or_create(
-            siren=siren,
-            defaults={'nom_entreprise': nom_entreprise}
-        )
+        form = QuestionnaireCollaborateurForm(request.POST, instance=questionnaire)
+        if form.is_valid():
+            questionnaire = form.save(commit=False)
+            questionnaire.entreprise = entreprise
+            questionnaire.collaborateur = request.user
+            questionnaire.save()
+            form.save_m2m()
 
-        # Créer ou mettre à jour le questionnaire
-        questionnaire, created = QuestionnaireCollaborateur.objects.update_or_create(
-            entreprise=entreprise,
-            defaults={
-                'collaborateur': request.user,
-                'assujettie_tva': request.POST.get('assujettie_tva', ''),
-                'code_ape': request.POST.get('code_ape', ''),
-                'activite_precise': request.POST.get('activite_precise', ''),
-                'taille_entreprise': request.POST.get('taille_entreprise', ''),
-                'regime_tva': request.POST.get('regime_tva', ''),
-                'activite_exoneree_tva': request.POST.get('activite_exoneree_tva', ''),
-                'plateforme_agreee': 'plateforme_agreee' in request.POST,
-                'plateforme_agreee_nom': request.POST.get('plateforme_agreee_nom', ''),
-                'nb_factures_ventes': request.POST.get('nb_factures_ventes', ''),
-                'nb_clients_actifs': request.POST.get('nb_clients_actifs', ''),
-                'vente_btob_domestique': 'vente_btob_domestique' in request.POST,
-                'vente_btob_export': 'vente_btob_export' in request.POST,
-                'vente_btoc_facture': 'vente_btoc_facture' in request.POST,
-                'vente_btoc_caisse': 'vente_btoc_caisse' in request.POST,
-                'nb_factures_achats': request.POST.get('nb_factures_achats', ''),
-                'nb_fournisseurs_actifs': request.POST.get('nb_fournisseurs_actifs', ''),
-                'achat_btob_domestique': 'achat_btob_domestique' in request.POST,
-                'achat_btob_intracommunautaire': 'achat_btob_intracommunautaire' in request.POST,
-                'achat_btob_hors_ue': 'achat_btob_hors_ue' in request.POST,
-                'commentaires': request.POST.get('commentaires', ''),
-            }
-        )
-
-        # Stocker en session
-        request.session['questionnaire_id'] = str(entreprise.siren)
-        messages.success(request, 'Questionnaire enregistré avec succès !')
-        return redirect('collaborateur_recapitulatif')
+            # Stocker en session
+            request.session['questionnaire_id'] = str(entreprise.siren)
+            messages.success(request, 'Questionnaire enregistré avec succès !')
+            return redirect('collaborateur_recapitulatif')
+        else:
+            # Afficher les erreurs spécifiques
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == '__all__':
+                        messages.error(request, f'{error}')
+                    else:
+                        field_label = form.fields[field].label or field
+                        messages.error(request, f'{field_label}: {error}')
+    else:
+        form = QuestionnaireCollaborateurForm(instance=questionnaire)
 
     return render(request, 'questionnaires/collaborateur/questionnaire.html', {
         'siren': siren,
-        'nom_entreprise': nom_entreprise
+        'nom_entreprise': nom_entreprise,
+        'form': form
     })
 
 
 @login_required
 def collaborateur_recapitulatif(request):
     """Récapitulatif questionnaire collaborateur"""
-    # TODO: Récupérer les données
     return render(request, 'questionnaires/collaborateur/recapitulatif.html')
 
 
@@ -377,24 +408,61 @@ def editer_entreprise(request, siren):
     has_client = hasattr(entreprise, 'questionnaire_client')
     has_collaborateur = hasattr(entreprise, 'questionnaire_collaborateur')
 
-    # Pour l'instant, rediriger vers la vue de visualisation
-    # TODO: Créer des formulaires d'édition dédiés
-    messages.info(request, 'La fonctionnalité d\'édition sera bientôt disponible.')
-    return redirect('voir_questionnaire', siren=siren)
+    # Récupérer ou initialiser les questionnaires
+    questionnaire_client = getattr(entreprise, 'questionnaire_client', None)
+    questionnaire_collaborateur = getattr(entreprise, 'questionnaire_collaborateur', None)
+
+    if request.method == 'POST':
+        # Déterminer quel formulaire a été soumis
+        form_type = request.POST.get('form_type')
+
+        if form_type == 'client' and has_client:
+            form_client = QuestionnaireClientForm(request.POST, instance=questionnaire_client)
+            if form_client.is_valid():
+                questionnaire = form_client.save(commit=False)
+                questionnaire.modifie_par_collaborateur = request.user
+                questionnaire.save()
+                form_client.save_m2m()
+                messages.success(request, 'Questionnaire client mis à jour avec succès.')
+                return redirect('voir_questionnaire', siren=siren)
+            else:
+                messages.error(request, 'Erreur dans le formulaire client. Veuillez vérifier vos réponses.')
+                form_collaborateur = QuestionnaireCollaborateurForm(instance=questionnaire_collaborateur) if has_collaborateur else None
+
+        elif form_type == 'collaborateur' and has_collaborateur:
+            form_collaborateur = QuestionnaireCollaborateurForm(request.POST, instance=questionnaire_collaborateur)
+            if form_collaborateur.is_valid():
+                questionnaire = form_collaborateur.save(commit=False)
+                questionnaire.collaborateur = request.user
+                questionnaire.save()
+                form_collaborateur.save_m2m()
+                messages.success(request, 'Questionnaire collaborateur mis à jour avec succès.')
+                return redirect('voir_questionnaire', siren=siren)
+            else:
+                messages.error(request, 'Erreur dans le formulaire collaborateur. Veuillez vérifier vos réponses.')
+                form_client = QuestionnaireClientForm(instance=questionnaire_client) if has_client else None
+        else:
+            messages.error(request, 'Type de formulaire invalide.')
+            return redirect('voir_questionnaire', siren=siren)
+    else:
+        # GET - afficher les formulaires
+        form_client = QuestionnaireClientForm(instance=questionnaire_client) if has_client else None
+        form_collaborateur = QuestionnaireCollaborateurForm(instance=questionnaire_collaborateur) if has_collaborateur else None
+
+    context = {
+        'entreprise': entreprise,
+        'has_client': has_client,
+        'has_collaborateur': has_collaborateur,
+        'form_client': form_client,
+        'form_collaborateur': form_collaborateur,
+    }
+
+    return render(request, 'questionnaires/collaborateur/editer_questionnaire.html', context)
 
 
-@login_required
-def export_csv(request):
-    """Exporter toutes les entreprises et questionnaires en CSV"""
-    # Créer la réponse CSV
-    response = HttpResponse(content_type='text/csv; charset=utf-8')
-    response['Content-Disposition'] = 'attachment; filename="export_questionnaires.csv"'
-    response.write('\ufeff')  # BOM UTF-8 pour Excel
-
-    writer = csv.writer(response, delimiter=';')
-
-    # En-têtes
-    writer.writerow([
+def _get_csv_headers():
+    """Retourne les en-têtes du CSV d'export"""
+    return [
         'SIREN',
         'Nom Entreprise',
         'Date Création',
@@ -443,7 +511,85 @@ def export_csv(request):
         'Collab - Achat B2B UE',
         'Collab - Achat B2B Hors UE',
         'Collab - Commentaires',
-    ])
+    ]
+
+
+def _build_csv_row(entreprise, qc, qco):
+    """
+    Construit une ligne du CSV d'export
+
+    Args:
+        entreprise: Instance de Entreprise
+        qc: Instance de QuestionnaireClient ou None
+        qco: Instance de QuestionnaireCollaborateur ou None
+
+    Returns:
+        list: Ligne de données pour le CSV
+    """
+    return [
+        entreprise.siren,
+        entreprise.nom_entreprise,
+        entreprise.date_creation.strftime('%d/%m/%Y %H:%M') if entreprise.date_creation else '',
+        entreprise.date_modification.strftime('%d/%m/%Y %H:%M') if entreprise.date_modification else '',
+        'Oui' if qc else 'Non',
+        'Oui' if qco else 'Non',
+        # Client
+        'Oui' if qc and qc.logiciel_facturation else 'Non' if qc else '',
+        qc.logiciel_facturation_nom if qc else '',
+        qc.get_factures_format_electronique_display() if qc else '',
+        'Oui' if qc and qc.logiciel_devis else 'Non' if qc else '',
+        qc.logiciel_devis_nom if qc else '',
+        qc.get_caisse_enregistreuse_display() if qc else '',
+        qc.caisse_enregistreuse_nom if qc else '',
+        qc.get_caisse_certifiee_display() if qc else '',
+        qc.get_plateforme_agreee_display() if qc else '',
+        qc.plateforme_agreee_nom if qc else '',
+        qc.get_gestion_future_display() if qc else '',
+        qc.get_aisance_outils_display() if qc else '',
+        qc.get_reception_factures_achats_display() if qc else '',
+        qc.reception_achats_autre if qc else '',
+        qc.get_envoi_factures_ventes_display() if qc else '',
+        qc.envoi_ventes_autre if qc else '',
+        qc.get_conservation_factures_display() if qc else '',
+        ', '.join(qc.accompagnement_souhaite) if qc and qc.accompagnement_souhaite else '',
+        qc.accompagnement_autre if qc else '',
+        qc.commentaires if qc else '',
+        # Collaborateur
+        qco.get_assujettie_tva_display() if qco else '',
+        qco.code_ape if qco else '',
+        qco.activite_precise if qco else '',
+        qco.get_taille_entreprise_display() if qco else '',
+        qco.get_regime_tva_display() if qco else '',
+        qco.get_activite_exoneree_tva_display() if qco else '',
+        'Oui' if qco and qco.plateforme_agreee else 'Non' if qco else '',
+        qco.plateforme_agreee_nom if qco else '',
+        qco.get_nb_factures_ventes_display() if qco else '',
+        qco.get_nb_clients_actifs_display() if qco else '',
+        'Oui' if qco and qco.vente_btob_domestique else 'Non' if qco else '',
+        'Oui' if qco and qco.vente_btob_export else 'Non' if qco else '',
+        'Oui' if qco and qco.vente_btoc_facture else 'Non' if qco else '',
+        'Oui' if qco and qco.vente_btoc_caisse else 'Non' if qco else '',
+        qco.get_nb_factures_achats_display() if qco else '',
+        qco.get_nb_fournisseurs_actifs_display() if qco else '',
+        'Oui' if qco and qco.achat_btob_domestique else 'Non' if qco else '',
+        'Oui' if qco and qco.achat_btob_intracommunautaire else 'Non' if qco else '',
+        'Oui' if qco and qco.achat_btob_hors_ue else 'Non' if qco else '',
+        qco.commentaires if qco else '',
+    ]
+
+
+@login_required
+def export_csv(request):
+    """Exporter toutes les entreprises et questionnaires en CSV"""
+    # Créer la réponse CSV
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="export_questionnaires.csv"'
+    response.write('\ufeff')  # BOM UTF-8 pour Excel
+
+    writer = csv.writer(response, delimiter=';')
+
+    # En-têtes
+    writer.writerow(_get_csv_headers())
 
     # Données
     entreprises = Entreprise.objects.filter(is_archived=False).select_related(
@@ -451,59 +597,9 @@ def export_csv(request):
         'questionnaire_collaborateur'
     )
 
-    for e in entreprises:
-        qc = e.questionnaire_client if hasattr(e, 'questionnaire_client') else None
-        qco = e.questionnaire_collaborateur if hasattr(e, 'questionnaire_collaborateur') else None
-
-        writer.writerow([
-            e.siren,
-            e.nom_entreprise,
-            e.date_creation.strftime('%d/%m/%Y %H:%M') if e.date_creation else '',
-            e.date_modification.strftime('%d/%m/%Y %H:%M') if e.date_modification else '',
-            'Oui' if qc else 'Non',
-            'Oui' if qco else 'Non',
-            # Client
-            'Oui' if qc and qc.logiciel_facturation else 'Non' if qc else '',
-            qc.logiciel_facturation_nom if qc else '',
-            qc.get_factures_format_electronique_display() if qc else '',
-            'Oui' if qc and qc.logiciel_devis else 'Non' if qc else '',
-            qc.logiciel_devis_nom if qc else '',
-            qc.get_caisse_enregistreuse_display() if qc else '',
-            qc.caisse_enregistreuse_nom if qc else '',
-            qc.get_caisse_certifiee_display() if qc else '',
-            qc.get_plateforme_agreee_display() if qc else '',
-            qc.plateforme_agreee_nom if qc else '',
-            qc.get_gestion_future_display() if qc else '',
-            qc.get_aisance_outils_display() if qc else '',
-            qc.get_reception_factures_achats_display() if qc else '',
-            qc.reception_achats_autre if qc else '',
-            qc.get_envoi_factures_ventes_display() if qc else '',
-            qc.envoi_ventes_autre if qc else '',
-            qc.get_conservation_factures_display() if qc else '',
-            ', '.join(qc.accompagnement_souhaite) if qc and qc.accompagnement_souhaite else '',
-            qc.accompagnement_autre if qc else '',
-            qc.commentaires if qc else '',
-            # Collaborateur
-            qco.get_assujettie_tva_display() if qco else '',
-            qco.code_ape if qco else '',
-            qco.activite_precise if qco else '',
-            qco.get_taille_entreprise_display() if qco else '',
-            qco.get_regime_tva_display() if qco else '',
-            qco.get_activite_exoneree_tva_display() if qco else '',
-            'Oui' if qco and qco.plateforme_agreee else 'Non' if qco else '',
-            qco.plateforme_agreee_nom if qco else '',
-            qco.get_nb_factures_ventes_display() if qco else '',
-            qco.get_nb_clients_actifs_display() if qco else '',
-            'Oui' if qco and qco.vente_btob_domestique else 'Non' if qco else '',
-            'Oui' if qco and qco.vente_btob_export else 'Non' if qco else '',
-            'Oui' if qco and qco.vente_btoc_facture else 'Non' if qco else '',
-            'Oui' if qco and qco.vente_btoc_caisse else 'Non' if qco else '',
-            qco.get_nb_factures_achats_display() if qco else '',
-            qco.get_nb_fournisseurs_actifs_display() if qco else '',
-            'Oui' if qco and qco.achat_btob_domestique else 'Non' if qco else '',
-            'Oui' if qco and qco.achat_btob_intracommunautaire else 'Non' if qco else '',
-            'Oui' if qco and qco.achat_btob_hors_ue else 'Non' if qco else '',
-            qco.commentaires if qco else '',
-        ])
+    for entreprise in entreprises:
+        qc = getattr(entreprise, 'questionnaire_client', None)
+        qco = getattr(entreprise, 'questionnaire_collaborateur', None)
+        writer.writerow(_build_csv_row(entreprise, qc, qco))
 
     return response

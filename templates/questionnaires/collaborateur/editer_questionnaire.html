@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Éditer - {{ entreprise.nom_entreprise }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'questionnaires/css/editer_questionnaire.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="edition-container">
+    <div class="page-header">
+        <h1>Éditer les questionnaires</h1>
+        <p class="subtitle">{{ entreprise.nom_entreprise }} (SIREN: {{ entreprise.siren }})</p>
+    </div>
+
+    <div class="btn-group mb-3">
+        <a href="{% url 'voir_questionnaire' siren=entreprise.siren %}" class="btn btn-secondary">
+            ← Retour
+        </a>
+    </div>
+
+    {% if has_client %}
+    <div class="card mb-4">
+        <h2>Questionnaire Client</h2>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="client">
+
+            {{ form_client.as_p }}
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                <a href="{% url 'voir_questionnaire' siren=entreprise.siren %}" class="btn btn-secondary">Annuler</a>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if has_collaborateur %}
+    <div class="card">
+        <h2>Questionnaire Collaborateur</h2>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="collaborateur">
+
+            {{ form_collaborateur.as_p }}
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                <a href="{% url 'voir_questionnaire' siren=entreprise.siren %}" class="btn btn-secondary">Annuler</a>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if not has_client and not has_collaborateur %}
+    <div class="card">
+        <p>Aucun questionnaire disponible pour cette entreprise.</p>
+        <a href="{% url 'dashboard' %}" class="btn btn-primary">Retour au dashboard</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

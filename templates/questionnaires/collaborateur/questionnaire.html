@@ -3,8 +3,12 @@
 
 {% block title %}Questionnaire Collaborateur - {{ nom_entreprise }}{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'questionnaires/css/questionnaire.css' %}">
+{% endblock %}
+
 {% block extra_js %}
-<script src="{% static 'questionnaires/js/autosave.js' %}"></script>
+<script src="{% static 'questionnaires/js/autosave.js' %}?v=4"></script>
 <script src="{% static 'questionnaires/js/progress-bar.js' %}"></script>
 {% endblock %}
 
@@ -26,119 +30,125 @@
             <h2>1. Assujettissement et activité</h2>
 
             <div class="form-group">
-                <label>L'entreprise est-elle assujettie à la TVA ? <span class="required">*</span></label>
+                <label class="strong">L'entreprise est-elle assujettie à la TVA ? <span class="required">*</span></label>
                 <div class="radio-group">
                     <label class="radio-option">
-                        <input type="radio" name="assujettie_tva" value="oui" required>
+                        <input type="radio" name="assujettie_tva" value="yes" required>
                         Oui
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="assujettie_tva" value="non">
+                        <input type="radio" name="assujettie_tva" value="no">
                         Non
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="assujettie_tva" value="doute">
+                        <input type="radio" name="assujettie_tva" value="unsure">
                         J'ai un doute
                     </label>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="code_ape">Code APE (NAF)</label>
+                <label for="code_ape" class="strong">Code APE (NAF)</label>
                 <input type="text" name="code_ape" id="code_ape" placeholder="Ex: 62.01Z">
                 <small class="form-help">Code activité principale de l'entreprise</small>
             </div>
 
             <div class="form-group">
-                <label for="activite_precise">Description précise de l'activité <span class="required">*</span></label>
+                <label for="activite_precise" class="strong">Description précise de l'activité <span class="required">*</span></label>
                 <textarea name="activite_precise" id="activite_precise" rows="3"
                     placeholder="Décrivez précisément l'activité de l'entreprise..." required></textarea>
             </div>
 
             <div class="form-group">
-                <label>Taille de l'entreprise <span class="required">*</span></label>
+                <label class="strong">Taille de l'entreprise <span class="required">*</span></label>
                 <div class="radio-group">
                     <label class="radio-option">
-                        <input type="radio" name="taille_entreprise" value="tpe_pme" required>
+                        <input type="radio" name="taille_entreprise" value="small_medium" required>
                         TPE/PME
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="taille_entreprise" value="eti">
+                        <input type="radio" name="taille_entreprise" value="mid_sized">
                         ETI (Entreprise de Taille Intermédiaire)
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="taille_entreprise" value="grande">
+                        <input type="radio" name="taille_entreprise" value="large">
                         Grande entreprise
                     </label>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Régime de TVA</label>
+                <label class="strong">Régime de TVA</label>
                 <div class="radio-group">
                     <label class="radio-option">
                         <input type="radio" name="regime_tva" value="franchise">
                         Franchise en base
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="regime_tva" value="reel_simplifie">
+                        <input type="radio" name="regime_tva" value="simplified_real">
                         Réel simplifié
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="regime_tva" value="reel_trimestriel">
+                        <input type="radio" name="regime_tva" value="quarterly_real">
                         Réel trimestriel
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="regime_tva" value="reel_mensuel">
+                        <input type="radio" name="regime_tva" value="monthly_real">
                         Réel mensuel
                     </label>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Secteur d'activité (exonération TVA)</label>
+                {% comment %} <label>Secteur d'activité (exonération TVA)</label> {% endcomment %}
+                <label class="strong">L'entreprise exerce-t-elle la totalité de son chiffre d'affaires dans l'une des activités suivantes, exonérées de TVA :</label>
+                <p>L'objectif ici est de détecter les cas dans lesquels il n'y aura qu'une plateforme en réception et pas de plateforme d'émission (assujetti TVA exonéré sur la totalité de son chiffre d'affaires)</p>
                 <div class="radio-group">
                     <label class="radio-option">
-                        <input type="radio" name="activite_exoneree_tva" value="sante">
-                        Prestations santé
+                        <input type="radio" name="activite_exoneree_tva" value="health">
+                        Prestations dans le domaine de la santé
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="activite_exoneree_tva" value="enseignement">
-                        Enseignement et formation
+                        <input type="radio" name="activite_exoneree_tva" value="education">
+                        Prestations d'enseignement et de formation
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="activite_exoneree_tva" value="immobilier">
+                        <input type="radio" name="activite_exoneree_tva" value="real_estate">
                         Opérations immobilières
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="activite_exoneree_tva" value="asso">
-                        Associations à but non lucratif
+                        <input type="radio" name="activite_exoneree_tva" value="nonprofit">
+                        Opérations réalisées par les associations à but non lucratif
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="activite_exoneree_tva" value="banque">
+                        <input type="radio" name="activite_exoneree_tva" value="banking">
                         Opérations bancaires et financières
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="activite_exoneree_tva" value="assurance">
-                        Opérations d'assurance
+                        <input type="radio" name="activite_exoneree_tva" value="insurance">
+                        Opérations d'assurance et de réassurance
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="activite_exoneree_tva" value="mixte">
-                        Activité mixte ou n'exerce pas dans ces secteurs
+                        <input type="radio" name="activite_exoneree_tva" value="mixed">
+                        Elle n'exerce pas dans ces secteurs ou elle a une ativité mixte (exonérée + soumise à TVA)
                     </label>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>
-                    <input type="checkbox" name="plateforme_agreee" value="1">
-                    Utilise une plateforme de dématérialisation agréée
-                </label>
+                <label class="strong">L'entreprise est-elle déjà inscrite sur une plateforme agréée ?</label>
+                <p>Ce point peut être vérifié directement sur l'annuaire public <a href="https://chorus-pro.gouv.fr" target="_blank" rel="noopener">ici</a></p>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="plateforme_agreee" value="True">
+                        Oui
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="plateforme_agreee" value="False">
+                        Non
+                    </label>
+                </div>
                 <input type="text" name="plateforme_agreee_nom" placeholder="Si oui, laquelle ?" class="conditional-input">
-                <small class="form-help">
-                    <a href="https://chorus-pro.gouv.fr" target="_blank" rel="noopener">Chorus Pro</a>,
-                    ou autre plateforme agréée
-                </small>
             </div>
         </div>
 
@@ -147,79 +157,79 @@
             <h2>2. Flux de facturation - Ventes</h2>
 
             <div class="form-group">
-                <label>Nombre de factures de ventes par an</label>
+                <label class="strong">Nombre approximatif de factures de ventes par an :</label>
                 <div class="radio-group">
                     <label class="radio-option">
-                        <input type="radio" name="nb_factures_ventes" value="moins_50">
+                        <input type="radio" name="nb_factures_ventes" value="less_than_50">
                         Moins de 50
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_factures_ventes" value="50_200">
+                        <input type="radio" name="nb_factures_ventes" value="between_50_200">
                         Entre 50 et 200
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_factures_ventes" value="200_1000">
+                        <input type="radio" name="nb_factures_ventes" value="between_200_1000">
                         Entre 200 et 1000
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_factures_ventes" value="1000_5000">
+                        <input type="radio" name="nb_factures_ventes" value="between_1000_5000">
                         Entre 1000 et 5000
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_factures_ventes" value="plus_5000">
+                        <input type="radio" name="nb_factures_ventes" value="more_than_5000">
                         Plus de 5000
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_factures_ventes" value="na">
+                        <input type="radio" name="nb_factures_ventes" value="not_applicable">
                         N/A
                     </label>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Nombre de clients actifs</label>
+                <label class="strong">Nombre approximatif de clients actifs</label>
                 <div class="radio-group">
                     <label class="radio-option">
-                        <input type="radio" name="nb_clients_actifs" value="moins_10">
+                        <input type="radio" name="nb_clients_actifs" value="less_than_10">
                         Moins de 10
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_clients_actifs" value="10_50">
+                        <input type="radio" name="nb_clients_actifs" value="between_10_50">
                         Entre 10 et 50
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_clients_actifs" value="50_200">
+                        <input type="radio" name="nb_clients_actifs" value="between_50_200">
                         Entre 50 et 200
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_clients_actifs" value="plus_200">
+                        <input type="radio" name="nb_clients_actifs" value="more_than_200">
                         Plus de 200
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_clients_actifs" value="na">
+                        <input type="radio" name="nb_clients_actifs" value="not_applicable">
                         N/A
                     </label>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Types de ventes (cochez si applicable)</label>
+                <label class="strong">Types de ventes réalisées par l'entreprise(cochez si applicable)</label>
                 <div class="checkbox-group">
                     <label class="checkbox-option">
                         <input type="checkbox" name="vente_btob_domestique" value="1">
-                        Ventes B2B France
+                        Ventes à des entreprises françaises (BtoB domestique)
                     </label>
                     <label class="checkbox-option">
                         <input type="checkbox" name="vente_btob_export" value="1">
-                        Ventes B2B Export (hors UE)
+                        Ventes à des entreprises étrangères (BtoB export)
                     </label>
                     <label class="checkbox-option">
                         <input type="checkbox" name="vente_btoc_facture" value="1">
-                        Ventes B2C avec facture
+                        Ventes à des particuliers avec facture (BtoC)
                     </label>
                     <label class="checkbox-option">
                         <input type="checkbox" name="vente_btoc_caisse" value="1">
-                        Ventes B2C avec ticket de caisse
+                        Ventes à des particuliers avec caisse (BtoC)
                     </label>
                 </div>
             </div>
@@ -230,75 +240,75 @@
             <h2>3. Flux de facturation - Achats</h2>
 
             <div class="form-group">
-                <label>Nombre de factures d'achats par an</label>
+                <label class="strong">Nombre approximatif de factures d'achats reçues par an :</label>
                 <div class="radio-group">
                     <label class="radio-option">
-                        <input type="radio" name="nb_factures_achats" value="moins_50">
+                        <input type="radio" name="nb_factures_achats" value="less_than_50">
                         Moins de 50
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_factures_achats" value="50_200">
+                        <input type="radio" name="nb_factures_achats" value="between_50_200">
                         Entre 50 et 200
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_factures_achats" value="200_1000">
+                        <input type="radio" name="nb_factures_achats" value="between_200_1000">
                         Entre 200 et 1000
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_factures_achats" value="1000_5000">
+                        <input type="radio" name="nb_factures_achats" value="between_1000_5000">
                         Entre 1000 et 5000
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_factures_achats" value="plus_5000">
+                        <input type="radio" name="nb_factures_achats" value="more_than_5000">
                         Plus de 5000
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_factures_achats" value="na">
+                        <input type="radio" name="nb_factures_achats" value="not_applicable">
                         N/A
                     </label>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Nombre de fournisseurs actifs</label>
+                <label class="strong">Nombre approximatif de fournisseurs actifs :</label>
                 <div class="radio-group">
                     <label class="radio-option">
-                        <input type="radio" name="nb_fournisseurs_actifs" value="moins_10">
+                        <input type="radio" name="nb_fournisseurs_actifs" value="less_than_10">
                         Moins de 10
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_fournisseurs_actifs" value="10_50">
+                        <input type="radio" name="nb_fournisseurs_actifs" value="between_10_50">
                         Entre 10 et 50
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_fournisseurs_actifs" value="50_200">
+                        <input type="radio" name="nb_fournisseurs_actifs" value="between_50_200">
                         Entre 50 et 200
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_fournisseurs_actifs" value="plus_200">
+                        <input type="radio" name="nb_fournisseurs_actifs" value="more_than_200">
                         Plus de 200
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="nb_fournisseurs_actifs" value="na">
+                        <input type="radio" name="nb_fournisseurs_actifs" value="not_applicable">
                         N/A
                     </label>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Types d'achats (cochez si applicable)</label>
+                <label class="strong">Types d'achats réalisés par l'entreprise(cochez si applicable)</label>
                 <div class="checkbox-group">
                     <label class="checkbox-option">
                         <input type="checkbox" name="achat_btob_domestique" value="1">
-                        Achats B2B France
+                        Achats auprès d'entreprises françaises (BtoB domestique)
                     </label>
                     <label class="checkbox-option">
                         <input type="checkbox" name="achat_btob_intracommunautaire" value="1">
-                        Achats B2B intracommunautaires (UE)
+                        Achats auprès d'entreprises étrangères (BtoB intracommunautaires)
                     </label>
                     <label class="checkbox-option">
                         <input type="checkbox" name="achat_btob_hors_ue" value="1">
-                        Achats B2B hors UE
+                        Achats de prestations de services auprès d'entreprises étrangères (BtoB hors UE)
                     </label>
                 </div>
             </div>
@@ -309,7 +319,7 @@
             <h2>4. Informations complémentaires</h2>
 
             <div class="form-group">
-                <label for="commentaires">Observations et informations complémentaires</label>
+                <label for="commentaires" class="strong">Observations et informations complémentaires</label>
                 <textarea name="commentaires" id="commentaires" rows="4"
                     placeholder="Observations, particularités, points d'attention..."></textarea>
             </div>
@@ -326,36 +336,4 @@
         </div>
     </form>
 </div>
-
-<style>
-.questionnaire-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.company-info {
-    color: var(--gris-moyen);
-    font-size: 0.95rem;
-}
-
-.section {
-    margin-bottom: 30px;
-}
-
-.section h2 {
-    color: var(--vert-moyen);
-    border-bottom: 2px solid var(--gris-clair);
-    padding-bottom: 10px;
-    margin-bottom: 25px;
-}
-
-.conditional-input {
-    margin-top: 10px;
-    margin-left: 30px;
-}
-
-.required {
-    color: var(--erreur);
-}
-</style>
 {% endblock %}

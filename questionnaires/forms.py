@@ -5,6 +5,45 @@ from .models import QuestionnaireClient, QuestionnaireCollaborateur
 class QuestionnaireClientForm(forms.ModelForm):
     """Formulaire pour le questionnaire client"""
 
+    # Champ personnalisé pour les checkboxes multiples
+    CHOIX_ACCOMPAGNEMENT = [
+        ('information', 'Information et sensibilisation sur la réforme'),
+        ('conseil', 'Conseil sur le choix des outils'),
+        ('formation', 'Formation à l\'utilisation des outils'),
+        ('parametrage', 'Paramétrage et mise en place des solutions'),
+        ('gestion_complete', 'Gestion complète de la facturation électronique'),
+        ('support', 'Support et assistance régulière'),
+        ('aucun', 'Aucun accompagnement nécessaire'),
+        ('autre', 'Autre'),
+    ]
+
+    accompagnement_souhaite = forms.MultipleChoiceField(
+        choices=CHOIX_ACCOMPAGNEMENT,
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="Quels types d'accompagnement souhaiteriez-vous de notre part ?"
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Si on édite un questionnaire existant, pré-remplir les checkboxes
+        if self.instance and self.instance.pk:
+            if self.instance.accompagnement_souhaite:
+                self.initial['accompagnement_souhaite'] = self.instance.accompagnement_souhaite
+
+        # Marquer les champs obligatoires
+        self.fields['factures_format_electronique'].required = True
+        self.fields['gestion_future'].required = True
+        self.fields['aisance_outils'].required = True
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        # Convertir la liste des choix multiples en JSON
+        instance.accompagnement_souhaite = self.cleaned_data.get('accompagnement_souhaite', [])
+        if commit:
+            instance.save()
+        return instance
+
     class Meta:
         model = QuestionnaireClient
         exclude = ['entreprise', 'date_completion', 'date_modification',

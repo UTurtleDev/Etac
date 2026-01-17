@@ -57,8 +57,11 @@
         const formData = new FormData(form);
         const data = {};
 
-        // Collecter toutes les données du formulaire
+        // Collecter toutes les données du formulaire (sauf le token CSRF)
         for (let [key, value] of formData.entries()) {
+            // Ne pas sauvegarder le token CSRF
+            if (key === 'csrfmiddlewaretoken') continue;
+
             if (data[key]) {
                 // Si la clé existe déjà, c'est un champ multiple (checkbox)
                 if (Array.isArray(data[key])) {
@@ -176,26 +179,30 @@
         const notification = document.createElement('div');
         notification.style.cssText = `
             position: fixed;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 20px;
+            right: 20px;
             background: var(--info);
             color: white;
-            padding: 15px 30px;
+            padding: 10px 20px;
             border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             z-index: 1000;
-            max-width: 500px;
-            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s;
         `;
         notification.textContent = message;
         document.body.appendChild(notification);
 
+        // Afficher la notification
+        setTimeout(() => {
+            notification.style.opacity = '1';
+        }, 10);
+
+        // Masquer puis supprimer
         setTimeout(() => {
             notification.style.opacity = '0';
-            notification.style.transition = 'opacity 0.5s';
-            setTimeout(() => notification.remove(), 500);
-        }, 5000);
+            setTimeout(() => notification.remove(), 300);
+        }, 2000);
     }
 
     /**

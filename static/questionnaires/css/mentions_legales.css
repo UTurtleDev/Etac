@@ -1,0 +1,23 @@
+.section {
+    margin: 40px 0;
+}
+
+.section h2 {
+    color: var(--vert-moyen);
+    border-bottom: 2px solid var(--gris-clair);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.section h3 {
+    margin-top: 25px;
+}
+
+.section ul {
+    margin-left: 30px;
+    margin-bottom: 15px;
+}
+
+.section li {
+    margin-bottom: 8px;
+}

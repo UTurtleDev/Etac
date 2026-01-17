@@ -7,18 +7,58 @@
    GESTION DES COOKIES RGPD
    ============================================================================ */
 
-function acceptCookies() {
-    // Stocker le consentement dans localStorage
-    localStorage.setItem('cookies-accepted', 'true');
-    localStorage.setItem('cookies-accepted-date', new Date().toISOString());
-
-    // Masquer la bannière
-    document.getElementById('cookie-banner').style.display = 'none';
+/**
+ * Crée un cookie avec une durée d'expiration
+ */
+function setCookie(name, value, days) {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + date.toUTCString();
+    document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax";
 }
 
+/**
+ * Récupère la valeur d'un cookie
+ */
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+        let cookie = cookies[i];
+        while (cookie.charAt(0) === ' ') {
+            cookie = cookie.substring(1);
+        }
+        if (cookie.indexOf(nameEQ) === 0) {
+            return cookie.substring(nameEQ.length, cookie.length);
+        }
+    }
+    return null;
+}
+
+/**
+ * Accepte les cookies RGPD
+ */
+function acceptCookies() {
+    // Créer un cookie Django valide 13 mois (environ 395 jours)
+    setCookie('cookies_accepted', 'true', 395);
+    setCookie('cookies_accepted_date', new Date().toISOString(), 395);
+
+    // Masquer la bannière
+    const banner = document.getElementById('cookie-banner');
+    if (banner) {
+        banner.style.display = 'none';
+    }
+}
+
+/**
+ * Vérifie le consentement cookies au chargement
+ */
 function checkCookieConsent() {
-    const accepted = localStorage.getItem('cookies-accepted');
-    const acceptedDate = localStorage.getItem('cookies-accepted-date');
+    const banner = document.getElementById('cookie-banner');
+    if (!banner) return;
+
+    const accepted = getCookie('cookies_accepted');
+    const acceptedDate = getCookie('cookies_accepted_date');
 
     if (accepted && acceptedDate) {
         // Vérifier la validité du consentement (13 mois)
@@ -27,17 +67,15 @@ function checkCookieConsent() {
         const monthsDiff = (now - consentDate) / (1000 * 60 * 60 * 24 * 30);
 
         if (monthsDiff > 13) {
-            // Consentement expiré
-            localStorage.removeItem('cookies-accepted');
-            localStorage.removeItem('cookies-accepted-date');
-            document.getElementById('cookie-banner').style.display = 'block';
+            // Consentement expiré, afficher la bannière
+            banner.style.display = 'block';
         } else {
-            // Consentement valide
-            document.getElementById('cookie-banner').style.display = 'none';
+            // Consentement valide, masquer la bannière
+            banner.style.display = 'none';
         }
     } else {
-        // Pas de consentement
-        document.getElementById('cookie-banner').style.display = 'block';
+        // Pas de consentement, afficher la bannière
+        banner.style.display = 'block';
     }
 }
 

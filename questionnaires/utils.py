@@ -6,6 +6,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# Mapping des messages d'erreur techniques vers messages user-friendly
+ERROR_MESSAGES = {
+    'Entreprise non trouvée': 'Ce numéro SIREN n\'existe pas dans la base des entreprises françaises. Vérifiez qu\'il est correct (9 chiffres).',
+    'Délai d\'attente dépassé': 'Le service de vérification des entreprises ne répond pas. Veuillez réessayer dans quelques instants.',
+    'Erreur de connexion à l\'API INSEE': 'Impossible de vérifier le SIREN pour le moment. Veuillez réessayer ultérieurement.',
+    'Erreur technique': 'Une erreur technique est survenue. Si le problème persiste, contactez le support.',
+}
+
+
 def get_company_info(siren):
     """
     Récupère les informations d'une entreprise via l'API INSEE Sirene 3.11.
@@ -50,11 +59,25 @@ def get_company_info(siren):
             data = response.json()
             # Extraction du nom de l'entreprise
             unite = data.get('uniteLegale', {})
-            nom = (
-                unite.get('denominationUniteLegale') or
-                unite.get('denominationUsuelle1UniteLegale') or
-                f"{unite.get('prenomUsuelUniteLegale', '')} {unite.get('nomUniteLegale', '')}".strip()
-            )
+            periodes = unite.get('periodesUniteLegale', [{}])
+            periode = periodes[0] if periodes else {}
+
+            # Logique de récupération du nom selon la priorité
+            denomination = periode.get('denominationUniteLegale')
+            if denomination:
+                nom = denomination
+            else:
+                denomination_usuelle = periode.get('denominationUsuelle1UniteLegale')
+                nom_legale = periode.get('nomUniteLegale', '')
+                prenom_usuel = unite.get('prenomUsuelUniteLegale', '')
+
+                if denomination_usuelle:
+                    # Format: denominationUsuelle1UniteLegale (nomUniteLegale prenomUsuelUniteLegale)
+                    complement = f"{nom_legale} {prenom_usuel}".strip()
+                    nom = f"{denomination_usuelle} ({complement})" if complement else denomination_usuelle
+                else:
+                    # Format: nomUniteLegale prenomUsuelUniteLegale
+                    nom = f"{nom_legale} {prenom_usuel}".strip()
 
             result = {
                 'success': True,
@@ -70,26 +93,30 @@ def get_company_info(siren):
 
         elif response.status_code == 404:
             logger.warning(f'API INSEE - SIREN not found: {siren}')
+            error_key = 'Entreprise non trouvée'
             return {
                 'success': False,
-                'error': 'Entreprise non trouvée'
+                'error': ERROR_MESSAGES.get(error_key, error_key)
             }
         else:
             logger.error(f'API INSEE - Error {response.status_code} for SIREN {siren}')
+            error_key = 'Erreur de connexion à l\'API INSEE'
             return {
                 'success': False,
-                'error': 'Erreur de connexion à l\'API INSEE'
+                'error': ERROR_MESSAGES.get(error_key, error_key)
             }
 
     except requests.Timeout:
         logger.error(f'API INSEE - Timeout for SIREN {siren}')
+        error_key = 'Délai d\'attente dépassé'
         return {
             'success': False,
-            'error': 'Délai d\'attente dépassé'
+            'error': ERROR_MESSAGES.get(error_key, error_key)
         }
     except Exception as e:
         logger.error(f'API INSEE - Exception for SIREN {siren}: {str(e)}')
+        error_key = 'Erreur technique'
         return {
             'success': False,
-            'error': 'Erreur technique'
+            'error': ERROR_MESSAGES.get(error_key, error_key)
         }

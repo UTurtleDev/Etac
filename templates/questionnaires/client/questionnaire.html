@@ -3,8 +3,12 @@
 
 {% block title %}Questionnaire Client - {{ nom_entreprise }}{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'questionnaires/css/questionnaire.css' %}">
+{% endblock %}
+
 {% block extra_js %}
-<script src="{% static 'questionnaires/js/autosave.js' %}"></script>
+<script src="{% static 'questionnaires/js/autosave.js' %}?v=4"></script>
 <script src="{% static 'questionnaires/js/progress-bar.js' %}"></script>
 {% endblock %}
 
@@ -24,95 +28,110 @@
         <!-- PARTIE 1 : ÉQUIPEMENT ACTUEL -->
         <div class="card section">
             <h2>1. Votre équipement actuel</h2>
+            <div class="text-infos">Ces informations essentielles nous permettront d'établir un premier diagnostic de votre situation.</div>
 
             <div class="form-group">
-                <label>
-                    <input type="checkbox" name="logiciel_facturation" value="1">
-                    Utilisez-vous un logiciel de facturation ?
-                </label>
-                <input type="text" name="logiciel_facturation_nom" placeholder="Si oui, lequel ?" class="conditional-input">
-            </div>
-
-            <div class="form-group">
-                <label>Vos factures sont-elles déjà au format électronique ? <span class="required">*</span></label>
+                <label>Utilisez-vous actuellement un logiciel de facturation ?</label>
                 <div class="radio-group">
                     <label class="radio-option">
-                        <input type="radio" name="factures_format_electronique" value="oui" required>
+                        <input type="radio" name="logiciel_facturation" value="true" {% if form.logiciel_facturation.value %}checked{% endif %}>
                         Oui
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="factures_format_electronique" value="non">
+                        <input type="radio" name="logiciel_facturation" value="false" {% if form.logiciel_facturation.value == False %}checked{% endif %}>
+                        Non
+                    </label>
+                </div>
+                <input type="text" name="logiciel_facturation_nom" placeholder="Si oui, lequel ?" class="conditional-input" value="{{ form.logiciel_facturation_nom.value|default:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Si oui, ce logiciel permet-il de générer des factures au format électronique ? <span class="required">*</span></label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="factures_format_electronique" value="yes" {% if form.factures_format_electronique.value == 'yes' %}checked{% endif %} required>
+                        Oui
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="factures_format_electronique" value="no" {% if form.factures_format_electronique.value == 'no' %}checked{% endif %}>
                         Non
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="factures_format_electronique" value="nsp">
+                        <input type="radio" name="factures_format_electronique" value="dont_know" {% if form.factures_format_electronique.value == 'dont_know' %}checked{% endif %}>
                         Je ne sais pas
                     </label>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>
-                    <input type="checkbox" name="logiciel_devis" value="1">
-                    Utilisez-vous un logiciel de devis ?
-                </label>
-                <input type="text" name="logiciel_devis_nom" placeholder="Si oui, lequel ?" class="conditional-input">
-            </div>
-
-            <div class="form-group">
-                <label>Utilisez-vous une caisse enregistreuse ?</label>
+                <label>Utilisez-vous actuellement un logiciel de devis ?</label>
                 <div class="radio-group">
                     <label class="radio-option">
-                        <input type="radio" name="caisse_enregistreuse" value="oui">
+                        <input type="radio" name="logiciel_devis" value="true" {% if form.logiciel_devis.value %}checked{% endif %}>
                         Oui
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="caisse_enregistreuse" value="non">
+                        <input type="radio" name="logiciel_devis" value="false" {% if form.logiciel_devis.value == False %}checked{% endif %}>
+                        Non
+                    </label>
+                </div>
+                <input type="text" name="logiciel_devis_nom" placeholder="Si oui, lequel ?" class="conditional-input" value="{{ form.logiciel_devis_nom.value|default:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Utilisez-vous une caisse enregistreuse ou un logiciel de point de vente ?</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="caisse_enregistreuse" value="yes" {% if form.caisse_enregistreuse.value == 'yes' %}checked{% endif %}>
+                        Oui
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="caisse_enregistreuse" value="no" {% if form.caisse_enregistreuse.value == 'no' %}checked{% endif %}>
                         Non
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="caisse_enregistreuse" value="na">
+                        <input type="radio" name="caisse_enregistreuse" value="not_applicable" {% if form.caisse_enregistreuse.value == 'not_applicable' %}checked{% endif %}>
                         Non applicable
                     </label>
                 </div>
-                <input type="text" name="caisse_enregistreuse_nom" placeholder="Si oui, quelle marque/modèle ?" class="conditional-input">
+                <input type="text" name="caisse_enregistreuse_nom" placeholder="Si oui, quelle marque/modèle ?" class="conditional-input" value="{{ form.caisse_enregistreuse_nom.value|default:'' }}">
             </div>
 
             <div class="form-group">
-                <label>Votre caisse est-elle certifiée conforme ?</label>
+                <label>Si oui, est-elle certifiée/conforme aux normes en vigueur ?</label>
                 <div class="radio-group">
                     <label class="radio-option">
-                        <input type="radio" name="caisse_certifiee" value="oui">
+                        <input type="radio" name="caisse_certifiee" value="yes" {% if form.caisse_certifiee.value == 'yes' %}checked{% endif %}>
                         Oui
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="caisse_certifiee" value="non">
+                        <input type="radio" name="caisse_certifiee" value="no" {% if form.caisse_certifiee.value == 'no' %}checked{% endif %}>
                         Non
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="caisse_certifiee" value="nsp">
+                        <input type="radio" name="caisse_certifiee" value="dont_know" {% if form.caisse_certifiee.value == 'dont_know' %}checked{% endif %}>
                         Je ne sais pas
                     </label>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Utilisez-vous une plateforme agréée pour la facturation ?</label>
+                <label>Êtes-vous déjà inscrit sur une plateforme agréée ?</label>
                 <div class="radio-group">
                     <label class="radio-option">
-                        <input type="radio" name="plateforme_agreee" value="oui">
+                        <input type="radio" name="plateforme_agreee" value="yes" {% if form.plateforme_agreee.value == 'yes' %}checked{% endif %}>
                         Oui
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="plateforme_agreee" value="non">
+                        <input type="radio" name="plateforme_agreee" value="no" {% if form.plateforme_agreee.value == 'no' %}checked{% endif %}>
                         Non
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="plateforme_agreee" value="nsp">
+                        <input type="radio" name="plateforme_agreee" value="dont_know" {% if form.plateforme_agreee.value == 'dont_know' %}checked{% endif %}>
                         Je ne sais pas
                     </label>
                 </div>
-                <input type="text" name="plateforme_agreee_nom" placeholder="Si oui, laquelle ?" class="conditional-input">
+                <input type="text" name="plateforme_agreee_nom" placeholder="Si oui, laquelle ?" class="conditional-input" value="{{ form.plateforme_agreee_nom.value|default:'' }}">
             </div>
         </div>
 
@@ -121,36 +140,36 @@
             <h2>2. Gestion de la facturation électronique</h2>
 
             <div class="form-group">
-                <label>Comment souhaitez-vous gérer la facturation électronique ? <span class="required">*</span></label>
+                <label>Concernant la future gestion de la facturation électronique, et au vu des explications qui vous ont été fournies (statuts, déclarations de chiffre d'affaires, accès à la plateforme, etc.), vous souhaitez plutôt : <span class="required">*</span></label>
                 <div class="radio-group">
                     <label class="radio-option">
-                        <input type="radio" name="gestion_future" value="interne" required>
-                        Gérer en interne avec accompagnement
+                        <input type="radio" name="gestion_future" value="internal" {% if form.gestion_future.value == 'internal' %}checked{% endif %} required>
+                        La gérer en interne avec notre accompagnement et formation
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="gestion_future" value="deleguer">
-                        Déléguer au cabinet
+                        <input type="radio" name="gestion_future" value="delegate" {% if form.gestion_future.value == 'delegate' %}checked{% endif %}>
+                        Déléguer totalement cette gestion au cabinet
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="gestion_future" value="nsp">
-                        Je ne sais pas, besoin de conseils
+                        <input type="radio" name="gestion_future" value="dont_know" {% if form.gestion_future.value == 'dont_know' %}checked{% endif %}>
+                        Je ne sais pas encore, j'ai besoin de conseils
                     </label>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Quel est votre niveau d'aisance avec les outils numériques ? <span class="required">*</span></label>
+                <label>Comment évaluez-vous votre niveau d'aisance avec les outils informatiques ? <span class="required">*</span></label>
                 <div class="radio-group">
                     <label class="radio-option">
-                        <input type="radio" name="aisance_outils" value="tres_aise" required>
+                        <input type="radio" name="aisance_outils" value="very_comfortable" {% if form.aisance_outils.value == 'very_comfortable' %}checked{% endif %} required>
                         Très à l'aise
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="aisance_outils" value="moyen">
+                        <input type="radio" name="aisance_outils" value="medium" {% if form.aisance_outils.value == 'medium' %}checked{% endif %}>
                         Moyen
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="aisance_outils" value="pas_aise">
+                        <input type="radio" name="aisance_outils" value="not_comfortable" {% if form.aisance_outils.value == 'not_comfortable' %}checked{% endif %}>
                         Pas du tout à l'aise
                     </label>
                 </div>
@@ -160,125 +179,131 @@
         <!-- PARTIE 3 : INFORMATIONS COMPLÉMENTAIRES -->
         <div class="card section">
             <h2>3. Informations complémentaires</h2>
+            <div class="text-infos">Ces informations complémentaires nous permettront d'affiner notre diagnostic et de vous proposer des solutions encore plus adaptées.</div>
 
             <div class="form-group">
                 <label>Comment recevez-vous actuellement vos factures d'achats ?</label>
                 <div class="radio-group">
                     <label class="radio-option">
-                        <input type="radio" name="reception_factures_achats" value="papier">
+                        <input type="radio" name="reception_factures_achats" value="paper" {% if form.reception_factures_achats.value == 'paper' %}checked{% endif %}>
                         Principalement par courrier papier
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="reception_factures_achats" value="email">
+                        <input type="radio" name="reception_factures_achats" value="email" {% if form.reception_factures_achats.value == 'email' %}checked{% endif %}>
                         Principalement par email (PDF)
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="reception_factures_achats" value="mixte">
+                        <input type="radio" name="reception_factures_achats" value="mixed" {% if form.reception_factures_achats.value == 'mixed' %}checked{% endif %}>
                         Mix papier/email
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="reception_factures_achats" value="plateforme">
-                        Via plateforme dématérialisée
+                        <input type="radio" name="reception_factures_achats" value="platform" {% if form.reception_factures_achats.value == 'platform' %}checked{% endif %}>
+                        Via une plateforme dématérialisée
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="reception_factures_achats" value="autre">
+                        <input type="radio" name="reception_factures_achats" value="other" {% if form.reception_factures_achats.value == 'other' %}checked{% endif %}>
                         Autre
                     </label>
                 </div>
-                <input type="text" name="reception_achats_autre" placeholder="Si autre, précisez" class="conditional-input">
+                <input type="text" name="reception_achats_autre" placeholder="Si autre, précisez" class="conditional-input" value="{{ form.reception_achats_autre.value|default:'' }}">
             </div>
 
             <div class="form-group">
                 <label>Comment envoyez-vous actuellement vos factures de ventes ?</label>
                 <div class="radio-group">
                     <label class="radio-option">
-                        <input type="radio" name="envoi_factures_ventes" value="papier">
+                        <input type="radio" name="envoi_factures_ventes" value="paper" {% if form.envoi_factures_ventes.value == 'paper' %}checked{% endif %}>
                         Principalement par courrier papier
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="envoi_factures_ventes" value="email">
+                        <input type="radio" name="envoi_factures_ventes" value="email" {% if form.envoi_factures_ventes.value == 'email' %}checked{% endif %}>
                         Principalement par email (PDF)
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="envoi_factures_ventes" value="mixte">
+                        <input type="radio" name="envoi_factures_ventes" value="mixed" {% if form.envoi_factures_ventes.value == 'mixed' %}checked{% endif %}>
                         Mix papier/email
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="envoi_factures_ventes" value="plateforme">
-                        Via plateforme dématérialisée
+                        <input type="radio" name="envoi_factures_ventes" value="platform" {% if form.envoi_factures_ventes.value == 'platform' %}checked{% endif %}>
+                        Via une plateforme dématérialisée
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="envoi_factures_ventes" value="autre">
+                        <input type="radio" name="envoi_factures_ventes" value="other" {% if form.envoi_factures_ventes.value == 'other' %}checked{% endif %}>
                         Autre
                     </label>
                 </div>
-                <input type="text" name="envoi_ventes_autre" placeholder="Si autre, précisez" class="conditional-input">
+                <input type="text" name="envoi_ventes_autre" placeholder="Si autre, précisez" class="conditional-input" value="{{ form.envoi_ventes_autre.value|default:'' }}">
             </div>
 
             <div class="form-group">
-                <label>Comment conservez-vous vos factures ?</label>
+                <label>Comment conservez-vous actuellement vos factures ?</label>
                 <div class="radio-group">
                     <label class="radio-option">
-                        <input type="radio" name="conservation_factures" value="papier">
+                        <input type="radio" name="conservation_factures" value="paper" {% if form.conservation_factures.value == 'paper' %}checked{% endif %}>
                         Classement papier uniquement
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="conservation_factures" value="electronique">
+                        <input type="radio" name="conservation_factures" value="electronic" {% if form.conservation_factures.value == 'electronic' %}checked{% endif %}>
                         Archivage électronique uniquement
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="conservation_factures" value="mixte">
+                        <input type="radio" name="conservation_factures" value="mixed" {% if form.conservation_factures.value == 'mixed' %}checked{% endif %}>
                         Mix papier + électronique
                     </label>
                     <label class="radio-option">
-                        <input type="radio" name="conservation_factures" value="cabinet">
+                        <input type="radio" name="conservation_factures" value="accounting_firm" {% if form.conservation_factures.value == 'accounting_firm' %}checked{% endif %}>
                         Confié au cabinet comptable
                     </label>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Quel type d'accompagnement souhaitez-vous ? (plusieurs choix possibles)</label>
+                <label>Quels types d'accompagnement souhaiteriez-vous de notre part ? (Vous pouvez cocher plusieurs réponses)</label>
                 <div class="checkbox-group">
+                    {% if form.accompagnement_souhaite.value %}
+                        {% for value in form.accompagnement_souhaite.value %}
+                            <input type="hidden" class="accompagnement-value" value="{{ value }}">
+                        {% endfor %}
+                    {% endif %}
                     <label class="checkbox-option">
-                        <input type="checkbox" name="accompagnement_souhaite" value="information">
-                        Information sur la réglementation
+                        <input type="checkbox" name="accompagnement_souhaite" value="information" {% if form.accompagnement_souhaite.value and 'information' in form.accompagnement_souhaite.value %}checked{% endif %}>
+                        Information et sensibilisation sur la réforme
                     </label>
                     <label class="checkbox-option">
-                        <input type="checkbox" name="accompagnement_souhaite" value="conseil">
-                        Conseil pour choisir une solution
+                        <input type="checkbox" name="accompagnement_souhaite" value="conseil" {% if form.accompagnement_souhaite.value and 'conseil' in form.accompagnement_souhaite.value %}checked{% endif %}>
+                        Conseil sur le choix des outils
                     </label>
                     <label class="checkbox-option">
-                        <input type="checkbox" name="accompagnement_souhaite" value="formation">
-                        Formation à l'utilisation
+                        <input type="checkbox" name="accompagnement_souhaite" value="formation" {% if form.accompagnement_souhaite.value and 'formation' in form.accompagnement_souhaite.value %}checked{% endif %}>
+                        Formation à l'utilisation des outils
                     </label>
                     <label class="checkbox-option">
-                        <input type="checkbox" name="accompagnement_souhaite" value="parametrage">
-                        Aide au paramétrage
+                        <input type="checkbox" name="accompagnement_souhaite" value="parametrage" {% if form.accompagnement_souhaite.value and 'parametrage' in form.accompagnement_souhaite.value %}checked{% endif %}>
+                        Paramétrage et mise en place des solutions
                     </label>
                     <label class="checkbox-option">
-                        <input type="checkbox" name="accompagnement_souhaite" value="gestion_complete">
-                        Gestion complète par le cabinet
+                        <input type="checkbox" name="accompagnement_souhaite" value="gestion_complete" {% if form.accompagnement_souhaite.value and 'gestion_complete' in form.accompagnement_souhaite.value %}checked{% endif %}>
+                        Gestion complète de la facturation électronique
                     </label>
                     <label class="checkbox-option">
-                        <input type="checkbox" name="accompagnement_souhaite" value="support">
-                        Support technique continu
+                        <input type="checkbox" name="accompagnement_souhaite" value="support" {% if form.accompagnement_souhaite.value and 'support' in form.accompagnement_souhaite.value %}checked{% endif %}>
+                        Support et assistance régulière
                     </label>
                     <label class="checkbox-option">
-                        <input type="checkbox" name="accompagnement_souhaite" value="aucun">
+                        <input type="checkbox" name="accompagnement_souhaite" value="aucun" {% if form.accompagnement_souhaite.value and 'aucun' in form.accompagnement_souhaite.value %}checked{% endif %}>
                         Aucun accompagnement nécessaire
                     </label>
                     <label class="checkbox-option">
-                        <input type="checkbox" name="accompagnement_souhaite" value="autre">
+                        <input type="checkbox" name="accompagnement_souhaite" value="autre" {% if form.accompagnement_souhaite.value and 'autre' in form.accompagnement_souhaite.value %}checked{% endif %}>
                         Autre
                     </label>
                 </div>
-                <input type="text" name="accompagnement_autre" placeholder="Si autre, précisez" class="conditional-input">
+                <input type="text" name="accompagnement_autre" placeholder="Si autre, précisez" class="conditional-input" value="{{ form.accompagnement_autre.value|default:'' }}">
             </div>
 
             <div class="form-group">
-                <label for="commentaires">Commentaires ou questions supplémentaires</label>
-                <textarea name="commentaires" id="commentaires" rows="4" placeholder="Vos commentaires ou questions..."></textarea>
+                <label for="commentaires">Avez-vous des commentaires ou des questions spécifiques concernant la facture électronique ?</label>
+                <textarea name="commentaires" id="commentaires" rows="4" placeholder="Vos commentaires ou questions...">{{ form.commentaires.value|default:'' }}</textarea>
             </div>
         </div>
 
@@ -293,36 +318,4 @@
         </div>
     </form>
 </div>
-
-<style>
-.questionnaire-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.company-info {
-    color: var(--gris-moyen);
-    font-size: 0.95rem;
-}
-
-.section {
-    margin-bottom: 30px;
-}
-
-.section h2 {
-    color: var(--vert-moyen);
-    border-bottom: 2px solid var(--gris-clair);
-    padding-bottom: 10px;
-    margin-bottom: 25px;
-}
-
-.conditional-input {
-    margin-top: 10px;
-    margin-left: 30px;
-}
-
-.required {
-    color: var(--erreur);
-}
-</style>
 {% endblock %}

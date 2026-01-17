@@ -1,0 +1,81 @@
+.recapitulatif-container {
+    max-width: 700px;
+    margin: 60px auto;
+}
+
+.success-card {
+    text-align: center;
+}
+
+.success-icon {
+    color: var(--vert-moyen);
+    margin-bottom: 20px;
+}
+
+.success-icon svg {
+    animation: checkmark 0.5s ease-in-out;
+}
+
+@keyframes checkmark {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.lead {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--vert-moyen);
+}
+
+.success-message {
+    text-align: left;
+    margin: 30px 0;
+}
+
+.next-steps {
+    text-align: left;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 6px;
+    margin: 30px 0;
+}
+
+.next-steps h3 {
+    color: var(--vert-moyen);
+    margin-bottom: 15px;
+}
+
+.steps-list {
+    list-style: none;
+    padding: 0;
+}
+
+.steps-list li {
+    padding: 10px 0;
+    padding-left: 30px;
+    position: relative;
+}
+
+.steps-list li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--vert-moyen);
+    font-weight: bold;
+}
+
+.contact-info {
+    margin: 30px 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--gris-clair);
+    color: var(--gris-moyen);
+}

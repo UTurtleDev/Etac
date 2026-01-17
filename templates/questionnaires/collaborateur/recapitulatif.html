@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Questionnaire enregistré{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'questionnaires/css/recapitulatif.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="recapitulatif-container">
@@ -34,49 +39,4 @@
         </div>
     </div>
 </div>
-
-<style>
-.recapitulatif-container {
-    max-width: 700px;
-    margin: 60px auto;
-}
-
-.success-card {
-    text-align: center;
-}
-
-.success-icon {
-    color: var(--vert-moyen);
-    margin-bottom: 20px;
-}
-
-.success-icon svg {
-    animation: checkmark 0.5s ease-in-out;
-}
-
-@keyframes checkmark {
-    0% {
-        transform: scale(0);
-        opacity: 0;
-    }
-    50% {
-        transform: scale(1.1);
-    }
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-.lead {
-    font-size: 1.25rem;
-    font-weight: 500;
-    color: var(--vert-moyen);
-}
-
-.success-message {
-    text-align: left;
-    margin: 30px 0;
-}
-</style>
 {% endblock %}

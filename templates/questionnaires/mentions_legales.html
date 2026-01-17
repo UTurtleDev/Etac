@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Mentions légales et RGPD{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'questionnaires/css/mentions_legales.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="card">
@@ -86,7 +91,7 @@
         <h2>Développement</h2>
         <p>
             Développé par <strong>UTurtleDev</strong> pour le Cabinet ETAC<br>
-            Année 2025
+            Année 2026
         </p>
     </div>
 
@@ -94,30 +99,4 @@
         <a href="{% url 'home' %}" class="btn btn-secondary">Retour à l'accueil</a>
     </div>
 </div>
-
-<style>
-.section {
-    margin: 40px 0;
-}
-
-.section h2 {
-    color: var(--vert-moyen);
-    border-bottom: 2px solid var(--gris-clair);
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-}
-
-.section h3 {
-    margin-top: 25px;
-}
-
-.section ul {
-    margin-left: 30px;
-    margin-bottom: 15px;
-}
-
-.section li {
-    margin-bottom: 8px;
-}
-</style>
 {% endblock %}
