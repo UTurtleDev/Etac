@@ -1,5 +1,6 @@
 .venv
 .env
+.env.prod
 db.sqlite3
 __pycache__/.venv/
 .python-version
