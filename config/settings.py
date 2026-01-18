@@ -30,7 +30,7 @@ environ.Env.read_env(BASE_DIR / '.env')
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+DEBUG = env.bool('DEBUG')
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
@@ -180,6 +180,11 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 # CSRF
 CSRF_COOKIE_SECURE = not DEBUG  
 CSRF_COOKIE_HTTPONLY = True
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://diagnostic-etac.sitesdemo.net',
+    'https://diagnostic-etac.sitesdemo.net',
+]
 
 # Cache (pour API INSEE - 24h)
 CACHES = {
