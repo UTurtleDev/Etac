@@ -13,3 +13,8 @@ CAHIER_DES_CHARGES_FINAL_COMPLET.md
 .claude
 .claude_history
 .claude_cache/
+
+
+# Hebergement
+.htaccess
+passenger_wsgi.py

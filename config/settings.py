@@ -25,7 +25,7 @@ env = environ.Env(
 )
 
 # Lire le fichier .env
-environ.Env.read_env(BASE_DIR / '.env')
+environ.Env.read_env(str(BASE_DIR / '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -99,7 +99,8 @@ if env('USE_MYSQL', default=False):
     # Production - MySQL
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql',
+            # 'ENGINE': 'django.db.backends.mysql',
+            'ENGINE': env('DB_ENGINE'),
             'NAME': env('DB_NAME'),
             'USER': env('DB_USER'),
             'PASSWORD': env('DB_PASSWORD'),
@@ -155,7 +156,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STATICFILES_DIRS = [
