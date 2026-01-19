@@ -16,6 +16,9 @@ import environ
 import pymysql
 pymysql.install_as_MySQLdb()
 
+# Ignorer la vérification de version Django/MySQL
+pymysql.version_info = (2, 2, 1, "final", 0)
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
