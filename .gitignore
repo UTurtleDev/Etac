@@ -2,8 +2,9 @@
 .env
 .env.prod
 db.sqlite3
-__pycache__/.venv/
-.python-version
+__pycache__/
+*.pyc
+*.pyo
 A
 CAHIER_DES_CHARGES_FINAL_COMPLET.md
 
@@ -18,3 +19,6 @@ CAHIER_DES_CHARGES_FINAL_COMPLET.md
 # Hebergement
 .htaccess
 passenger_wsgi.py
+
+# Static files en production
+staticfiles/
