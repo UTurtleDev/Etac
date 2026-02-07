@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Introduction - Questionnaire Client{% endblock %}
+
+{% block content %}
+<div class="client-introduction">
+    <div class="intro-card">
+        <h1>Questionnaire - Facture Électronique</h1>
+
+        <div class="intro-content">
+            <p class="intro-greeting"><span class="strong">Cher client,</span></p>
+
+            <p>
+                Dans le cadre de la mise en conformité de votre entreprise avec la réforme de la facture électronique, 
+                nous réalisons un diagnostic de votre situation actuelle afin de vous proposer un accompagnement adapté à vos besoins.
+            </p>
+
+            <p>
+                Ce questionnaire nous permettra d'identifier les solutions les plus pertinentes pour votre activité
+                 et de planifier ensemble les étapes de la transition.
+            </p>
+
+            <p>
+                Cette démarche est importante compte tenu des sanctions prévues par l’administration en cas de non conformité :
+            </p>
+            <ul class="intro-list">
+                <li>15€ par facture qui ne serait pas transmise via les plateformes</li>
+                <li>250 € par remontée de chiffre d’affaires non réalisée</li>
+                <li>500 € en cas de non désignation de plateforme.</li>
+            </ul>
+            <p></p>
+            <div class="intro-info">
+                <p><span class="strong">Temps de réponse estimée :</span> 5 à 10 minutes</p>
+                <p><strong>Confidentialité :</strong> Vos réponses sont strictement confidentielles et utilisées
+                    uniquement dans le cadre de votre accompagnement par le Cabinet ETAC.</p>
+            </div>
+
+            <p class="intro-thanks">
+                Merci de votre collaboration.
+            </p>
+
+            <p class="intro-signature">
+                <strong>L'équipe du Cabinet ETAC</strong>
+            </p>
+        </div>
+
+        <div class="intro-actions">
+            <a href="{% url 'client_identification' %}" class="btn btn-primary btn-large">
+                Commencer le questionnaire
+            </a>
+            <a href="{% url 'home' %}" class="btn btn-secondary">
+                Retour à l'accueil
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

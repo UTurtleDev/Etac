@@ -429,9 +429,50 @@ input[type="checkbox"] {
     margin-bottom: 40px;
 }
 
+.intro-title {
+    color: var(--vert-fonce);
+    text-align: center;
+}
+
+.intro-subtitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.333;
+    margin-top: 70px;
+    margin-bottom: 40px;
+
+}
+
 .intro-text {
     max-width: 700px;
     margin: 0 auto;
+}
+
+.question  {
+    margin-bottom: 0rem;
+}
+
+ul {
+    margin-bottom: 1rem;
+    margin-left: 1rem;
+}
+
+ul li {
+    margin-left: 1rem;
+}
+
+ol {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+
+.intro-thanks {
+    margin-top: 3rem;
+}
+
+.intro-signature {
+    margin-bottom: 3rem;
 }
 
 .cta-section {
