@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 import csv
 from .models import Entreprise, QuestionnaireClient, QuestionnaireCollaborateur
+from users.models import Cabinet, User
 from .forms import QuestionnaireClientForm, QuestionnaireCollaborateurForm
 from .utils import get_company_info
 
@@ -90,6 +91,11 @@ def client_identification(request):
         siren = request.POST.get('siren', '').strip()
         action = request.POST.get('action', '')
 
+        # Stocker cabinet et comptable en session
+        request.session['client_cabinet_id'] = request.POST.get('cabinet')
+        request.session['client_comptable_id'] = request.POST.get('comptable')
+
+
         # Utiliser la fonction helper pour le traitement
         result = _process_siren_identification(
             request, siren, 'client', check_existing_questionnaire=True
@@ -98,7 +104,8 @@ def client_identification(request):
         if not result['success']:
             messages.error(request, result['error'])
             return render(request, 'questionnaires/client/identification.html', {
-                'siren': siren
+                'siren': siren,
+                'cabinets': Cabinet.objects.all().order_by('nom'),
             })
 
         # Si un questionnaire existe déjà
@@ -110,13 +117,34 @@ def client_identification(request):
             return render(request, 'questionnaires/client/identification.html', {
                 'siren': siren,
                 'nom_entreprise': result['nom'],
-                'questionnaire_exists': True
+                'questionnaire_exists': True,
+                'cabinets': Cabinet.objects.all().order_by('nom'),
             })
 
         # Rediriger vers le questionnaire
         return redirect('client_questionnaire')
 
-    return render(request, 'questionnaires/client/identification.html')
+    return render(request, 'questionnaires/client/identification.html', {
+        'cabinets': Cabinet.objects.all().order_by('nom'),
+    })
+
+@require_http_methods(["GET"])
+def get_comptables(request):
+    """Endpoint HTMX : retourne les options comptables selon le cabinet choisi"""
+    cabinet_id = request.GET.get('cabinet')
+
+    if not cabinet_id:
+        return HttpResponse('<option value="">-- Sélectionner d\'abord un cabinet --</option>')
+
+    comptables = User.objects.filter(
+        cabinet_id=cabinet_id,
+        is_collaborateur=True,
+        is_active=True
+    ).order_by('last_name', 'first_name')
+
+    return render(request, 'questionnaires/partials/options_comptables.html', {
+        'comptables': comptables
+    })
 
 
 @require_http_methods(["GET"])

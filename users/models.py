@@ -2,6 +2,17 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
+class Cabinet(models.Model):
+    nom = models.CharField(max_length=255, verbose_name="Nom du cabinet")
+
+    def __str__(self):
+        return self.nom
+    
+    class Meta:
+        verbose_name = "Cabinet"
+        verbose_name_plural = "Cabinets"
+
+
 class User(AbstractUser):
     """Custom user pour les collaborateurs du cabinet ETAC"""
 
@@ -15,9 +26,18 @@ class User(AbstractUser):
         help_text="Collaborateur du cabinet ETAC"
     )
 
+    cabinet = models.ForeignKey(
+        Cabinet,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="Comptables",
+        verbose_name="Cabinet"
+    )
+
     # Email comme identifiant
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    REQUIRED_FIELDS = ['first_name', 'last_name']
 
     class Meta:
         verbose_name = "Utilisateur"

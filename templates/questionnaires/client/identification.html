@@ -48,6 +48,29 @@
                 </div>
 
                 <div id="company-name"></div>
+
+                <label for="cabinet">Selectionner votre cabinet <span class="required">*</span></label>
+                <select name="cabinet" 
+                        id="cabinet"
+                        required
+                        hx-get="{% url 'get_comptables' %}"
+                        hx-trigger="change"
+                        hx-target="#select-comptable"
+                        hx-include="[name='cabinet']"
+                >
+                    <option value="">-- Sélectionner votre cabinet --</option>
+                    {% for cabinet in cabinets %}
+                        <option value="{{ cabinet.id }}">{{ cabinet.nom }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="comptable">Selectionner votre comptable <span class="required">*</span></label>
+                <select name="comptable"
+                        id="select-comptable"
+                        required
+                        >
+                    <option value="">-- Sélectionner d'abord un cabinet --</option>    
+                </select>
             </div>
 
             {% if questionnaire_exists %}
@@ -77,15 +100,6 @@
             {% endif %}
         </form>
 
-        <div class="help-box">
-            <h4>Où trouver mon numéro SIREN ?</h4>
-            <ul>
-                <li>Sur vos factures</li>
-                <li>Sur votre extrait Kbis</li>
-                <li>Sur vos documents administratifs</li>
-                <li>Sur le site <a href="https://www.sirene.fr" target="_blank" rel="noopener">sirene.fr</a></li>
-            </ul>
-        </div>
     </div>
 </div>
 {% endblock %}

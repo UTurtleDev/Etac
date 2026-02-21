@@ -1,0 +1,6 @@
+<option value="">-- Sélectionner votre comptable --</option>
+{% for comptable in comptables %}
+    <option value="{{ comptable.id }}">{{ comptable.get_full_name }}</option>
+{% empty %}
+    <option value="" disabled>Aucun comptable disponible pour ce cabinet</option>
+{% endfor %}

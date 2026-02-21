@@ -27,7 +27,7 @@
                 {% if user.is_authenticated %}
                 <nav class="header-nav">
                     <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
-                    <span class="nav-user">{{ user.get_full_name|default:user.email }}</span>
+                    <span class="nav-user">{{ user.first_name }}</span>
                     <form method="post" action="{% url 'logout' %}" style="display: inline;">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-secondary btn-sm">Déconnexion</button>
