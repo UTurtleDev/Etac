@@ -87,13 +87,21 @@ def client_introduction(request):
 
 def client_identification(request):
     """Page d'identification avec SIREN"""
+
+    # Toujours préparer les cabinets (utilisé dans tous les render)
+    cabinets = Cabinet.objects.all().order_by('nom')
+
     if request.method == 'POST':
         siren = request.POST.get('siren', '').strip()
         action = request.POST.get('action', '')
 
-        # Stocker cabinet et comptable en session
-        request.session['client_cabinet_id'] = request.POST.get('cabinet')
-        request.session['client_comptable_id'] = request.POST.get('comptable')
+        # Stocker cabinet et comptable en session (seulement si fournis)
+        cabinet = request.POST.get('cabinet')
+        comptable = request.POST.get('comptable')
+        if cabinet:
+            request.session['client_cabinet_id'] = cabinet
+        if comptable:
+            request.session['client_comptable_id'] = comptable
 
 
         # Utiliser la fonction helper pour le traitement
@@ -105,27 +113,48 @@ def client_identification(request):
             messages.error(request, result['error'])
             return render(request, 'questionnaires/client/identification.html', {
                 'siren': siren,
-                'cabinets': Cabinet.objects.all().order_by('nom'),
+                'cabinets': cabinets,
             })
 
         # Si un questionnaire existe déjà
         if result['exists']:
             # Si l'utilisateur a confirmé qu'il veut modifier, rediriger vers le questionnaire
             if action == 'modifier':
-                return redirect('client_questionnaire')
+                request.session.pop('questionnaire_exists', None)
+                return redirect('client_questionnaire')     
+            
+            request.session['questionnaire_exists'] = True
+
+            # Préparer la pré-sélection cabinet/comptable pour le template
+            selected_cabinet_id = str(request.session.get('client_cabinet_id', ''))
+            selected_comptable_id = str(request.session.get('client_comptable_id', ''))
+            selected_comptables = []
+            if selected_cabinet_id:
+                selected_comptables = User.objects.filter(
+                    cabinet_id=selected_cabinet_id,
+                    is_collaborateur=True,
+                    is_active=True
+                ).order_by('last_name', 'first_name')
+
             # Sinon, afficher un avertissement
             return render(request, 'questionnaires/client/identification.html', {
                 'siren': siren,
                 'nom_entreprise': result['nom'],
                 'questionnaire_exists': True,
-                'cabinets': Cabinet.objects.all().order_by('nom'),
+                'cabinets': cabinets,
+                'selected_cabinet_id': selected_cabinet_id,
+                'selected_comptable_id': selected_comptable_id,
+                'selected_comptables': selected_comptables,
             })
 
         # Rediriger vers le questionnaire
         return redirect('client_questionnaire')
 
     return render(request, 'questionnaires/client/identification.html', {
-        'cabinets': Cabinet.objects.all().order_by('nom'),
+        'cabinets': cabinets,
+        'questionnaire_exists': request.session.get('questionnaire_exists', False),
+        'siren': request.session.get('client_siren', ''),
+        'nom_entreprise': request.session.get('client_nom_entreprise', ''),
     })
 
 @require_http_methods(["GET"])

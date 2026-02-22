@@ -35,11 +35,15 @@
                     placeholder="9 chiffres"
                     value="{{ siren|default:'' }}"
                     required
+                    {% if not questionnaire_exists %}
                     hx-get="{% url 'validate_siren' %}"
-                    hx-trigger="keyup changed delay:500ms, blur"
+                    hx-trigger="keyup changed delay:500ms"
                     hx-target="#company-name"
                     hx-indicator="#spinner"
                     hx-include="[name='siren']"
+                    {% else %}
+                    readonly
+                    {% endif %}
                 >
                 <small class="form-help">Le SIREN est un numéro à 9 chiffres qui identifie votre entreprise</small>
 
@@ -60,7 +64,10 @@
                 >
                     <option value="">-- Sélectionner votre cabinet --</option>
                     {% for cabinet in cabinets %}
-                        <option value="{{ cabinet.id }}">{{ cabinet.nom }}</option>
+                        <option value="{{ cabinet.id }}"
+                            {% if cabinet.id|stringformat:"s" == selected_cabinet_id %}selected{% endif %}>
+                            {{ cabinet.nom }}
+                        </option>
                     {% endfor %}
                 </select>
 
@@ -69,7 +76,17 @@
                         id="select-comptable"
                         required
                         >
-                    <option value="">-- Sélectionner d'abord un cabinet --</option>    
+                    {% if questionnaire_exists and selected_comptables %}
+                        <option value="">-- Sélectionner votre comptable --</option>
+                        {% for comptable in selected_comptables %}
+                            <option value="{{ comptable.id }}"
+                                {% if comptable.id|stringformat:"s" == selected_comptable_id %}selected{% endif %}>
+                                {{ comptable.get_full_name }}
+                            </option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="">-- Sélectionner d'abord un cabinet --</option>
+                    {% endif %}
                 </select>
             </div>
 
@@ -78,28 +95,20 @@
                 <strong>⚠️ Un questionnaire existe déjà pour cette entreprise :</strong>
                 <p>{{ nom_entreprise }} (SIREN: {{ siren }})</p>
                 <p>Souhaitez-vous le modifier ?</p>
-
                 <div class="btn-group">
                     <button type="submit" name="action" value="modifier" class="btn btn-primary">
                         Modifier le questionnaire
                     </button>
-                    <a href="{% url 'home' %}" class="btn btn-secondary">
-                        Annuler
-                    </a>
+                    <a href="{% url 'home' %}" class="btn btn-secondary">Annuler</a>
                 </div>
             </div>
             {% else %}
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                    Continuer
-                </button>
-                <a href="{% url 'client_introduction' %}" class="btn btn-secondary">
-                    Retour
-                </a>
+                <button type="submit" class="btn btn-primary">Continuer</button>
+                <a href="{% url 'client_introduction' %}" class="btn btn-secondary">Retour</a>
             </div>
-            {% endif %}
+            {% endif %}        
         </form>
-
     </div>
 </div>
 {% endblock %}
