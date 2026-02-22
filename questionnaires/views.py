@@ -226,6 +226,15 @@ def client_questionnaire(request):
         if form.is_valid():
             questionnaire = form.save(commit=False)
             questionnaire.entreprise = entreprise
+            # Associer le cabinet et le collaborateur sélectionnés par le client (si non déjà définis)
+            if not questionnaire.cabinet_id:
+                cabinet_id_session = request.session.get('client_cabinet_id')
+                if cabinet_id_session:
+                    questionnaire.cabinet_id = cabinet_id_session
+            if not questionnaire.collaborateur_id:
+                collaborateur_id_session = request.session.get('client_comptable_id')
+                if collaborateur_id_session:
+                    questionnaire.collaborateur_id = collaborateur_id_session
             questionnaire.save()
             form.save_m2m()  # Nécessaire pour sauvegarder les ManyToMany (accompagnement_souhaite)
 
@@ -268,6 +277,12 @@ def dashboard(request):
     search_query = request.GET.get('search', '').strip()
     filter_questionnaire = request.GET.get('filter', 'all')
     sort_by = request.GET.get('sort', '-date_modification')
+    cabinet_id = request.GET.get('cabinet', '')
+    collaborateur_id = request.GET.get('collaborateur', '')
+
+    # Listes pour les filtres
+    cabinets = Cabinet.objects.all().order_by('nom')
+    collaborateurs = User.objects.filter(is_collaborateur=True).order_by('last_name', 'first_name')
 
     # Statistiques
     total_entreprises = Entreprise.objects.filter(is_archived=False).count()
@@ -309,6 +324,20 @@ def dashboard(request):
             questionnaire_collaborateur__isnull=True
         )
 
+    # Filtrer par cabinet
+    if cabinet_id:
+        entreprises = entreprises.filter(
+            Q(questionnaire_collaborateur__collaborateur__cabinet_id=cabinet_id) |
+            Q(questionnaire_client__cabinet_id=cabinet_id)
+        ).distinct()
+
+    # Filtrer par collaborateur
+    if collaborateur_id:
+        entreprises = entreprises.filter(
+            Q(questionnaire_collaborateur__collaborateur_id=collaborateur_id) |
+            Q(questionnaire_client__collaborateur_id=collaborateur_id)
+        ).distinct()
+
     # Tri
     valid_sorts = ['siren', '-siren', 'nom_entreprise', '-nom_entreprise',
                    'date_creation', '-date_creation', 'date_modification', '-date_modification']
@@ -329,6 +358,10 @@ def dashboard(request):
         'search_query': search_query,
         'filter_questionnaire': filter_questionnaire,
         'sort_by': sort_by,
+        'cabinets': cabinets,
+        'collaborateurs': collaborateurs,
+        'cabinet_id': cabinet_id,
+        'collaborateur_id': collaborateur_id,
     }
 
     return render(request, 'questionnaires/collaborateur/dashboard.html', context)

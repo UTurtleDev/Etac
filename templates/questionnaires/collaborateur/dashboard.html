@@ -66,6 +66,26 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="cabinet">Filtrer par cabinet</label>
+                    <select id="cabinet" name="cabinet">
+                        <option value="">Tous les cabinets</option>
+                        {% for cab in cabinets %}
+                        <option value="{{ cab.id }}" {% if cabinet_id == cab.id|stringformat:"s" %}selected{% endif %}>{{ cab.nom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="collaborateur">Filtrer par collaborateur</label>
+                    <select id="collaborateur" name="collaborateur">
+                        <option value="">Tous les collaborateurs</option>
+                        {% for collab in collaborateurs %}
+                        <option value="{{ collab.id }}" {% if collaborateur_id == collab.id|stringformat:"s" %}selected{% endif %}>{{ collab.get_full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label for="sort">Trier par</label>
                     <select id="sort" name="sort">
                         <option value="-date_modification" {% if sort_by == '-date_modification' %}selected{% endif %}>Date modification ↓</option>
@@ -90,7 +110,7 @@
     <!-- Liste des entreprises -->
     <div class="card">
         <h2>Liste des entreprises
-            {% if search_query or filter_questionnaire != 'all' %}
+            {% if search_query or filter_questionnaire != 'all' or cabinet_id or collaborateur_id %}
             <small>({{ page_obj.paginator.count }} résultat{{ page_obj.paginator.count|pluralize }})</small>
             {% endif %}
         </h2>
@@ -161,7 +181,7 @@
         {% if page_obj.has_other_pages %}
         <div class="pagination">
             {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&filter={{ filter_questionnaire }}&sort={{ sort_by }}" class="btn btn-secondary">
+            <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&filter={{ filter_questionnaire }}&sort={{ sort_by }}&cabinet={{ cabinet_id }}&collaborateur={{ collaborateur_id }}" class="btn btn-secondary">
                 ← Précédent
             </a>
             {% endif %}
@@ -172,7 +192,7 @@
             </span>
 
             {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&filter={{ filter_questionnaire }}&sort={{ sort_by }}" class="btn btn-secondary">
+            <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&filter={{ filter_questionnaire }}&sort={{ sort_by }}&cabinet={{ cabinet_id }}&collaborateur={{ collaborateur_id }}" class="btn btn-secondary">
                 Suivant →
             </a>
             {% endif %}

@@ -181,6 +181,22 @@ class QuestionnaireClient(models.Model):
         blank=True,
         related_name='questionnaires_client_modifies'
     )
+    cabinet = models.ForeignKey(
+        'users.Cabinet',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='questionnaires_client',
+        verbose_name="Cabinet associé"
+    )
+    collaborateur = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='questionnaires_client_associes',
+        verbose_name="Collaborateur associé"
+    )
     cookies_consent_date = models.DateTimeField(
         null=True,
         blank=True,
