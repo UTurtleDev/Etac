@@ -2,10 +2,20 @@ from django.contrib import admin
 from .models import Entreprise, QuestionnaireClient, QuestionnaireCollaborateur
 
 
+class QuestionnaireClientCabinetInline(admin.StackedInline):
+    model = QuestionnaireClient
+    fields = ('cabinet', 'collaborateur')
+    extra = 0
+    verbose_name = "Affectation"
+    verbose_name_plural = "Affectation cabinet / collaborateur"
+    can_delete = False
+
+
 @admin.register(Entreprise)
 class EntrepriseAdmin(admin.ModelAdmin):
-    list_display = ('siren', 'nom_entreprise', 'date_creation', 'date_modification', 'is_archived')
-    list_filter = ('is_archived', 'date_creation', 'date_modification')
+    inlines = [QuestionnaireClientCabinetInline]
+    list_display = ('siren', 'nom_entreprise', 'get_cabinet', 'get_collaborateur', 'date_creation', 'date_modification', 'is_archived')
+    list_filter = ('is_archived', 'questionnaire_client__cabinet', 'questionnaire_client__collaborateur', 'date_creation', 'date_modification')
     search_fields = ('siren', 'nom_entreprise')
     ordering = ('-date_modification',)
     readonly_fields = ('date_creation', 'date_modification')
@@ -22,6 +32,20 @@ class EntrepriseAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+    @admin.display(description='Cabinet', ordering='questionnaire_client__cabinet__nom')
+    def get_cabinet(self, obj):
+        try:
+            return obj.questionnaire_client.cabinet
+        except Entreprise.questionnaire_client.RelatedObjectDoesNotExist:
+            return '-'
+
+    @admin.display(description='Collaborateur', ordering='questionnaire_client__collaborateur__last_name')
+    def get_collaborateur(self, obj):
+        try:
+            return obj.questionnaire_client.collaborateur
+        except Entreprise.questionnaire_client.RelatedObjectDoesNotExist:
+            return '-'
 
 
 @admin.register(QuestionnaireClient)
