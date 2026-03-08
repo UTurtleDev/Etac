@@ -48,26 +48,19 @@
         <h2>Filtres et recherche</h2>
         <form method="get" class="filters-form">
             <div class="filters-grid">
-                <div class="form-group">
+                {% comment %} <div class="form-group">
                     <label for="search">Recherche</label>
                     <input type="text" id="search" name="search" value="{{ search_query }}"
                            placeholder="SIREN ou nom d'entreprise">
-                </div>
-
-                <div class="form-group">
-                    <label for="filter">Filtrer par questionnaire</label>
-                    <select id="filter" name="filter">
-                        <option value="all" {% if filter_questionnaire == 'all' %}selected{% endif %}>Tous</option>
-                        <option value="both" {% if filter_questionnaire == 'both' %}selected{% endif %}>Les deux complétés</option>
-                        <option value="client_only" {% if filter_questionnaire == 'client_only' %}selected{% endif %}>Client uniquement</option>
-                        <option value="collaborateur_only" {% if filter_questionnaire == 'collaborateur_only' %}selected{% endif %}>Collaborateur uniquement</option>
-                        <option value="none" {% if filter_questionnaire == 'none' %}selected{% endif %}>Aucun questionnaire</option>
-                    </select>
-                </div>
+                </div> {% endcomment %}
 
                 <div class="form-group">
                     <label for="cabinet">Filtrer par cabinet</label>
-                    <select id="cabinet" name="cabinet">
+                    <select id="cabinet" name="cabinet"
+                            hx-get="{% url 'get_collaborateurs' %}"
+                            hx-trigger="change"
+                            hx-target="#collaborateur"
+                            hx-include="[name='cabinet']">
                         <option value="">Tous les cabinets</option>
                         {% for cab in cabinets %}
                         <option value="{{ cab.id }}" {% if cabinet_id == cab.id|stringformat:"s" %}selected{% endif %}>{{ cab.nom }}</option>
@@ -86,6 +79,16 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="filter">Filtrer par questionnaire</label>
+                    <select id="filter" name="filter">
+                        <option value="all" {% if filter_questionnaire == 'all' %}selected{% endif %}>Tous</option>
+                        <option value="both" {% if filter_questionnaire == 'both' %}selected{% endif %}>Les deux complétés</option>
+                        <option value="client_only" {% if filter_questionnaire == 'client_only' %}selected{% endif %}>Client uniquement</option>
+                        <option value="collaborateur_only" {% if filter_questionnaire == 'collaborateur_only' %}selected{% endif %}>Collaborateur uniquement</option>
+                    </select>
+                </div>
+
+                {% comment %} <div class="form-group">
                     <label for="sort">Trier par</label>
                     <select id="sort" name="sort">
                         <option value="-date_modification" {% if sort_by == '-date_modification' %}selected{% endif %}>Date modification ↓</option>
@@ -97,7 +100,7 @@
                         <option value="siren" {% if sort_by == 'siren' %}selected{% endif %}>SIREN ↑</option>
                         <option value="-siren" {% if sort_by == '-siren' %}selected{% endif %}>SIREN ↓</option>
                     </select>
-                </div>
+                </div> {% endcomment %}
             </div>
 
             <div class="btn-group">
@@ -201,6 +204,7 @@
     </div>
 </div>
 
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 <script>
 function confirmDelete(siren, nomEntreprise) {
     if (confirm(`Êtes-vous sûr de vouloir archiver l'entreprise "${nomEntreprise}" (SIREN: ${siren}) ?\n\nCette action peut être annulée depuis l'administration.`)) {

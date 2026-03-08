@@ -1,0 +1,6 @@
+<option value="">Tous les collaborateurs</option>
+{% for collab in collaborateurs %}
+    <option value="{{ collab.id }}">{{ collab.get_full_name }}</option>
+{% empty %}
+    <option value="" disabled>Aucun collaborateur pour ce cabinet</option>
+{% endfor %}

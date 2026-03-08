@@ -16,6 +16,7 @@ urlpatterns = [
     path('client/questionnaire/', views.client_questionnaire, name='client_questionnaire'),
     path('client/recapitulatif/', views.client_recapitulatif, name='client_recapitulatif'),
     path('get-comptables/', views.get_comptables, name='get_comptables'),
+    path('get-collaborateurs/', views.get_collaborateurs, name='get_collaborateurs'),
 
     # Parcours COLLABORATEUR - Authentification
     path('collaborateur/login/', auth_views.LoginView.as_view(

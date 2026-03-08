@@ -158,6 +158,25 @@ def client_identification(request):
     })
 
 @require_http_methods(["GET"])
+def get_collaborateurs(request):
+    """Endpoint HTMX : retourne les options collaborateurs selon le cabinet choisi (dashboard)"""
+    cabinet_id = request.GET.get('cabinet')
+
+    if not cabinet_id:
+        return HttpResponse('<option value="">Tous les collaborateurs</option>')
+
+    collaborateurs = User.objects.filter(
+        cabinet_id=cabinet_id,
+        is_collaborateur=True,
+        is_active=True
+    ).order_by('last_name', 'first_name')
+
+    return render(request, 'questionnaires/partials/options_collaborateurs.html', {
+        'collaborateurs': collaborateurs
+    })
+
+
+@require_http_methods(["GET"])
 def get_comptables(request):
     """Endpoint HTMX : retourne les options comptables selon le cabinet choisi"""
     cabinet_id = request.GET.get('cabinet')
@@ -282,12 +301,35 @@ def dashboard(request):
 
     # Listes pour les filtres
     cabinets = Cabinet.objects.all().order_by('nom')
-    collaborateurs = User.objects.filter(is_collaborateur=True).order_by('last_name', 'first_name')
+    collaborateurs_qs = User.objects.filter(is_collaborateur=True)
+    if cabinet_id:
+        collaborateurs_qs = collaborateurs_qs.filter(cabinet_id=cabinet_id)
+    collaborateurs = collaborateurs_qs.order_by('last_name', 'first_name')
 
-    # Statistiques
-    total_entreprises = Entreprise.objects.filter(is_archived=False).count()
-    questionnaires_client = QuestionnaireClient.objects.count()
-    questionnaires_collaborateur = QuestionnaireCollaborateur.objects.count()
+    # Statistiques (filtrées par cabinet/collaborateur si sélectionné)
+    qs_entreprises = Entreprise.objects.filter(is_archived=False)
+    qs_client = QuestionnaireClient.objects.all()
+    qs_collab = QuestionnaireCollaborateur.objects.all()
+
+    if cabinet_id:
+        qs_entreprises = qs_entreprises.filter(
+            Q(questionnaire_collaborateur__collaborateur__cabinet_id=cabinet_id) |
+            Q(questionnaire_client__cabinet_id=cabinet_id)
+        ).distinct()
+        qs_client = qs_client.filter(cabinet_id=cabinet_id)
+        qs_collab = qs_collab.filter(collaborateur__cabinet_id=cabinet_id)
+
+    if collaborateur_id:
+        qs_entreprises = qs_entreprises.filter(
+            Q(questionnaire_collaborateur__collaborateur_id=collaborateur_id) |
+            Q(questionnaire_client__collaborateur_id=collaborateur_id)
+        ).distinct()
+        qs_client = qs_client.filter(collaborateur_id=collaborateur_id)
+        qs_collab = qs_collab.filter(collaborateur_id=collaborateur_id)
+
+    total_entreprises = qs_entreprises.count()
+    questionnaires_client = qs_client.count()
+    questionnaires_collaborateur = qs_collab.count()
 
     # Liste des entreprises avec filtres
     entreprises = Entreprise.objects.filter(is_archived=False).select_related(
