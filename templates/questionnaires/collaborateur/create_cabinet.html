@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Créer un cabinet{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 40px auto; padding: 0 20px;">
+    <div class="card">
+        <h1 style="margin-bottom: 8px;">Nouveau cabinet</h1>
+        <p style="color: var(--gris-moyen); margin-bottom: 28px;">Renseignez le nom du cabinet à créer.</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.nom.id_for_label }}">
+                    Nom du cabinet <span class="required">*</span>
+                </label>
+                {{ form.nom }}
+                {% if form.nom.errors %}
+                    {% for error in form.nom.errors %}
+                        <p style="color: var(--erreur, #D32F2F); font-size: 0.875rem; margin-top: 4px;">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="form-actions" style="display: flex; gap: 12px; margin-top: 24px;">
+                <button type="submit" class="btn btn-primary">Créer le cabinet</button>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Annuler</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

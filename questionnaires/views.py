@@ -8,7 +8,7 @@ from django.core.paginator import Paginator
 import csv
 from .models import Entreprise, QuestionnaireClient, QuestionnaireCollaborateur
 from users.models import Cabinet, User
-from .forms import QuestionnaireClientForm, QuestionnaireCollaborateurForm
+from .forms import QuestionnaireClientForm, QuestionnaireCollaborateurForm, CabinetForm
 from .utils import get_company_info
 
 
@@ -407,6 +407,20 @@ def dashboard(request):
     }
 
     return render(request, 'questionnaires/collaborateur/dashboard.html', context)
+
+
+@login_required
+def create_cabinet(request):
+    """Créer un nouveau cabinet"""
+    if request.method == 'POST':
+        form = CabinetForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Cabinet « {form.cleaned_data['nom']} » créé avec succès.")
+            return redirect('dashboard')
+    else:
+        form = CabinetForm()
+    return render(request, 'questionnaires/collaborateur/create_cabinet.html', {'form': form})
 
 
 @login_required

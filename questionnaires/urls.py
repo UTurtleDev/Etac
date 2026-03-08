@@ -36,4 +36,5 @@ urlpatterns = [
     path('collaborateur/archiver/<str:siren>/', views.archiver_entreprise, name='archiver_entreprise'),
     path('collaborateur/editer/<str:siren>/', views.editer_entreprise, name='editer_entreprise'),
     path('collaborateur/export-csv/', views.export_csv, name='export_csv'),
+    path('collaborateur/cabinet/creer/', views.create_cabinet, name='create_cabinet'),
 ]

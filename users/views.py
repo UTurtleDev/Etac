@@ -35,8 +35,8 @@ def inscription_collaborateur(request):
         form = CollaborateurInscriptionForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.")
-            return redirect('collaborateur_login')
+            messages.success(request, f"Collaborateur « {form.cleaned_data['first_name']} {form.cleaned_data['last_name']} » créé avec succès.")
+            return redirect('dashboard')
     else:
         form = CollaborateurInscriptionForm()
     return render(request, 'users/inscription.html', {'form': form})

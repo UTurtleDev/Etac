@@ -1,5 +1,16 @@
 from django import forms
 from .models import QuestionnaireClient, QuestionnaireCollaborateur
+from users.models import Cabinet
+
+
+class CabinetForm(forms.ModelForm):
+    class Meta:
+        model = Cabinet
+        fields = ['nom']
+        labels = {'nom': 'Nom du cabinet'}
+        widgets = {
+            'nom': forms.TextInput(attrs={'placeholder': 'Ex: Cabinet Martin & Associés'})
+        }
 
 
 class QuestionnaireClientForm(forms.ModelForm):

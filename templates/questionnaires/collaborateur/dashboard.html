@@ -55,7 +55,8 @@
                 </div> {% endcomment %}
 
                 <div class="form-group">
-                    <label for="cabinet">Filtrer par cabinet</label>
+                    <label for="cabinet">Filtrer par cabinet <a href="{% url 'create_cabinet' %}" title="Ajouter un cabinet">⏏️</a></label>
+                    
                     <select id="cabinet" name="cabinet"
                             hx-get="{% url 'get_collaborateurs' %}"
                             hx-trigger="change"
@@ -69,7 +70,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="collaborateur">Filtrer par collaborateur</label>
+                    <label for="collaborateur">Filtrer par collaborateur <a href="{% url 'users:inscription_collaborateur' %}" title="Ajouter un collaborateur">⏏️</a></label>
                     <select id="collaborateur" name="collaborateur">
                         <option value="">Tous les collaborateurs</option>
                         {% for collab in collaborateurs %}
