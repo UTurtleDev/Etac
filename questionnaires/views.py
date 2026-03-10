@@ -131,7 +131,7 @@ def client_identification(request):
             selected_comptables = []
             if selected_cabinet_id:
                 selected_comptables = User.objects.filter(
-                    cabinet_id=selected_cabinet_id,
+                    cabinets__id=selected_cabinet_id,
                     is_collaborateur=True,
                     is_active=True
                 ).order_by('last_name', 'first_name')
@@ -166,10 +166,10 @@ def get_collaborateurs(request):
         return HttpResponse('<option value="">Tous les collaborateurs</option>')
 
     collaborateurs = User.objects.filter(
-        cabinet_id=cabinet_id,
+        cabinets__id=cabinet_id,
         is_collaborateur=True,
         is_active=True
-    ).order_by('last_name', 'first_name')
+    ).distinct().order_by('last_name', 'first_name')
 
     return render(request, 'questionnaires/partials/options_collaborateurs.html', {
         'collaborateurs': collaborateurs
@@ -185,10 +185,10 @@ def get_comptables(request):
         return HttpResponse('<option value="">-- Sélectionner d\'abord un cabinet --</option>')
 
     comptables = User.objects.filter(
-        cabinet_id=cabinet_id,
+        cabinets__id=cabinet_id,
         is_collaborateur=True,
         is_active=True
-    ).order_by('last_name', 'first_name')
+    ).distinct().order_by('last_name', 'first_name')
 
     return render(request, 'questionnaires/partials/options_comptables.html', {
         'comptables': comptables
@@ -303,7 +303,7 @@ def dashboard(request):
     cabinets = Cabinet.objects.all().order_by('nom')
     collaborateurs_qs = User.objects.filter(is_collaborateur=True)
     if cabinet_id:
-        collaborateurs_qs = collaborateurs_qs.filter(cabinet_id=cabinet_id)
+        collaborateurs_qs = collaborateurs_qs.filter(cabinets__id=cabinet_id)
     collaborateurs = collaborateurs_qs.order_by('last_name', 'first_name')
 
     # Statistiques (filtrées par cabinet/collaborateur si sélectionné)
@@ -313,11 +313,11 @@ def dashboard(request):
 
     if cabinet_id:
         qs_entreprises = qs_entreprises.filter(
-            Q(questionnaire_collaborateur__collaborateur__cabinet_id=cabinet_id) |
+            Q(questionnaire_collaborateur__collaborateur__cabinets__id=cabinet_id) |
             Q(questionnaire_client__cabinet_id=cabinet_id)
         ).distinct()
         qs_client = qs_client.filter(cabinet_id=cabinet_id)
-        qs_collab = qs_collab.filter(collaborateur__cabinet_id=cabinet_id)
+        qs_collab = qs_collab.filter(collaborateur__cabinets__id=cabinet_id)
 
     if collaborateur_id:
         qs_entreprises = qs_entreprises.filter(
@@ -369,7 +369,7 @@ def dashboard(request):
     # Filtrer par cabinet
     if cabinet_id:
         entreprises = entreprises.filter(
-            Q(questionnaire_collaborateur__collaborateur__cabinet_id=cabinet_id) |
+            Q(questionnaire_collaborateur__collaborateur__cabinets__id=cabinet_id) |
             Q(questionnaire_client__cabinet_id=cabinet_id)
         ).distinct()
 

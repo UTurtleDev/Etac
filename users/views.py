@@ -10,16 +10,15 @@ class CollaborateurInscriptionForm(UserCreationForm):
     first_name = forms.CharField(max_length=150, required=True, label="Prénom")
     last_name = forms.CharField(max_length=150, required=True, label="Nom")
     email = forms.EmailField(required=True, label="Adresse email")
-    cabinet = forms.ModelChoiceField(
+    cabinets = forms.ModelMultipleChoiceField(
         queryset=Cabinet.objects.all(),
         required=True,
-        label="Cabinet",
-        empty_label="Sélectionnez un cabinet",
+        label="Cabinets",
     )
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'email', 'cabinet', 'password1', 'password2')
+        fields = ('first_name', 'last_name', 'email', 'cabinets', 'password1', 'password2')
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -27,6 +26,7 @@ class CollaborateurInscriptionForm(UserCreationForm):
         user.is_collaborateur = True
         if commit:
             user.save()
+            user.cabinets.set(self.cleaned_data['cabinets'])
         return user
 
 

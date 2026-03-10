@@ -10,7 +10,7 @@ class CustomUserAdmin(UserAdmin):
     list_filter = ('is_collaborateur', 'is_staff', 'is_active')
 
     fieldsets = (
-        (None, {'fields': ('email', 'password', 'cabinet')}),
+        (None, {'fields': ('email', 'password', 'cabinets')}),
         ('Informations personnelles', {'fields': ('first_name', 'last_name')}),
         ('Statut', {'fields': ('is_collaborateur', 'is_staff', 'is_active')}),
         ('Permissions', {'fields': ('is_superuser', 'groups', 'user_permissions')}),
@@ -20,7 +20,7 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'first_name', 'last_name', 'cabinet', 'password1', 'password2', 'is_collaborateur', 'is_staff', 'is_active')
+            'fields': ('email', 'first_name', 'last_name', 'cabinets', 'password1', 'password2', 'is_collaborateur', 'is_staff', 'is_active')
         }),
     )
 

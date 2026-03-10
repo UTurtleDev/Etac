@@ -26,13 +26,11 @@ class User(AbstractUser):
         help_text="Collaborateur du cabinet ETAC"
     )
 
-    cabinet = models.ForeignKey(
+    cabinets = models.ManyToManyField(
         Cabinet,
-        on_delete=models.SET_NULL,
-        null=True,
         blank=True,
         related_name="Comptables",
-        verbose_name="Cabinet"
+        verbose_name="Cabinets"
     )
 
     # Email comme identifiant
